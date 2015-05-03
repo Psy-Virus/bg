@@ -26,154 +26,163 @@
  * @link http://2moons.cc/
  */
 
-abstract class AbstractPage 
+abstract class AbstractPage
 {
-	protected $tplObj;
-	protected $window;
-	public $defaultWindow = 'normal';
-	
-	protected function __construct() {
-		
-		if(!AJAX_REQUEST)
-		{
-			$this->setWindow($this->defaultWindow);
-			$this->initTemplate();
-		} else {
-			$this->setWindow('ajax');
-		}
-	}
-	
-	protected function initTemplate() {
-		if(isset($this->tplObj))
-			return true;
-			
-		$this->tplObj	= new template;
-		list($tplDir)	= $this->tplObj->getTemplateDir();
-		$this->tplObj->setTemplateDir($tplDir.'login/');
-		return true;
-	}
-	
-	protected function setWindow($window) {
-		$this->window	= $window;
-	}
-		
-	protected function getWindow() {
-		return $this->window;
-	}
-	
-	protected function getQueryString() {
-		$queryString	= array();
-		$page			= HTTP::_GP('page', '');
-		
-		if(!empty($page)) {
-			$queryString['page']	= $page;
-		}
-		
-		$mode			= HTTP::_GP('mode', '');
-		if(!empty($mode)) {
-			$queryString['mode']	= $mode;
-		}
-		
-		return http_build_query($queryString);
-	}
-	
-	protected function getPageData() 
-    {		
-		global $USER, $CONF, $LNG, $UNI;
-		
-		$dateTimeServer	= new DateTime("now");
-		$dateTimeUser	= $dateTimeServer;
-		
+    protected $tplObj;
+    protected $window;
+    public $defaultWindow = 'normal';
+    
+    protected function __construct()
+    {
+        if (!AJAX_REQUEST) {
+            $this->setWindow($this->defaultWindow);
+            $this->initTemplate();
+        } else {
+            $this->setWindow('ajax');
+        }
+    }
+    
+    protected function initTemplate()
+    {
+        if (isset($this->tplObj)) {
+            return true;
+        }
+            
+        $this->tplObj    = new template;
+        list($tplDir)    = $this->tplObj->getTemplateDir();
+        $this->tplObj->setTemplateDir($tplDir.'login/');
+        return true;
+    }
+    
+    protected function setWindow($window)
+    {
+        $this->window    = $window;
+    }
+        
+    protected function getWindow()
+    {
+        return $this->window;
+    }
+    
+    protected function getQueryString()
+    {
+        $queryString    = array();
+        $page            = HTTP::_GP('page', '');
+        
+        if (!empty($page)) {
+            $queryString['page']    = $page;
+        }
+        
+        $mode            = HTTP::_GP('mode', '');
+        if (!empty($mode)) {
+            $queryString['mode']    = $mode;
+        }
+        
+        return http_build_query($queryString);
+    }
+    
+    protected function getPageData()
+    {
+        global $USER, $CONF, $LNG, $UNI;
+        
+        $dateTimeServer    = new DateTime("now");
+        $dateTimeUser    = $dateTimeServer;
+        
         $this->tplObj->assign_vars(array(
-			'recaptchaEnable'		=> Config::get('capaktiv'),
-			'recaptchaPublicKey'	=> Config::get('cappublic'),
-			'gameName' 				=> Config::get('game_name'),
-			'facebookEnable'		=> Config::get('fb_on'),
-			'fb_key' 				=> Config::get('fb_apikey'),
-			'mailEnable'			=> Config::get('mail_active'),
-			'reg_close'				=> Config::get('reg_closed'),
-			'referralEnable'		=> Config::get('ref_active'),
-			'analyticsEnable'		=> Config::get('ga_active'),
-			'analyticsUID'			=> Config::get('ga_key'),
-			'lang'					=> $LNG->getLanguage(),
-			'UNI'					=> $UNI,
-			'VERSION'				=> Config::get('VERSION'),
-			'REV'					=> substr(Config::get('VERSION'), -4),
-			'languages'				=> Language::getAllowedLangs(false),
-		));
-	}
-	
-	protected function printMessage($message, $redirect = NULL, $redirectButtons = NULL, $fullSide = true)
-	{
-		$this->assign(array(
-			'message'			=> $message,
-			'redirectButtons'	=> $redirectButtons,
-		));
-		
-		if(isset($redirect)) {
-			$this->tplObj->gotoside($redirect[0], $redirect[1]);
-		}
-		
-		if(!$fullSide) {
-			$this->setWindow('popup');
-		}
-		
-		$this->render('error.default.tpl');
-	}
-	
-	protected function save() {
-		
-	}
-	
-	protected function assign($array) {
-		$this->tplObj->assign_vars($array);
-	}
-	
-	protected function render($file) {
-		global $LNG, $CONFIG;
-		
-		$this->save();
-		
-		if($this->getWindow() !== 'ajax') {
-			$this->getPageData();
-		}
-		
-		$this->assign(array(
-            'lang'    			=> $LNG->getLanguage(),
-			'scripts'			=> $this->tplObj->jsscript,
-			'execscript'		=> implode("\n", $this->tplObj->script),
-			'bodyclass'			=> $this->getWindow(),
-			'basepath'			=> PROTOCOL.HTTP_HOST.HTTP_BASE,
-			'isMultiUniverse'	=> count($CONFIG) > 1,
-		));
+            'recaptchaEnable'        => Config::get('capaktiv'),
+            'recaptchaPublicKey'    => Config::get('cappublic'),
+            'gameName'                => Config::get('game_name'),
+            'facebookEnable'        => Config::get('fb_on'),
+            'fb_key'                => Config::get('fb_apikey'),
+            'mailEnable'            => Config::get('mail_active'),
+            'reg_close'                => Config::get('reg_closed'),
+            'referralEnable'        => Config::get('ref_active'),
+            'analyticsEnable'        => Config::get('ga_active'),
+            'analyticsUID'            => Config::get('ga_key'),
+            'lang'                    => $LNG->getLanguage(),
+            'UNI'                    => $UNI,
+            'VERSION'                => Config::get('VERSION'),
+            'REV'                    => substr(Config::get('VERSION'), -4),
+            'languages'                => Language::getAllowedLangs(false),
+        ));
+    }
+    
+    protected function printMessage($message, $redirect = NULL, $redirectButtons = NULL, $fullSide = true)
+    {
+        $this->assign(array(
+            'message'            => $message,
+            'redirectButtons'    => $redirectButtons,
+        ));
+        
+        if (isset($redirect)) {
+            $this->tplObj->gotoside($redirect[0], $redirect[1]);
+        }
+        
+        if (!$fullSide) {
+            $this->setWindow('popup');
+        }
+        
+        $this->render('error.default.tpl');
+    }
+    
+    protected function save()
+    {
+    }
+    
+    protected function assign($array)
+    {
+        $this->tplObj->assign_vars($array);
+    }
+    
+    protected function render($file)
+    {
+        global $LNG, $CONFIG;
+        
+        $this->save();
+        
+        if ($this->getWindow() !== 'ajax') {
+            $this->getPageData();
+        }
+        
+        $this->assign(array(
+            'lang'                => $LNG->getLanguage(),
+            'scripts'            => $this->tplObj->jsscript,
+            'execscript'        => implode("\n", $this->tplObj->script),
+            'bodyclass'            => $this->getWindow(),
+            'basepath'            => PROTOCOL.HTTP_HOST.HTTP_BASE,
+            'isMultiUniverse'    => count($CONFIG) > 1,
+        ));
 
-		$this->assign(array(
-			'LNG'			=> $LNG,
-		), false);
-		
-		$this->tplObj->display('extends:layout.'.$this->getWindow().'.tpl|'.$file);
-		exit;
-	}
-	
-	protected function sendJSON($data) {
-		$this->save();
-		echo json_encode($data);
-		exit;
-	}
-	
-	protected function redirectTo($url) {
-		$this->save();
-		HTTP::redirectTo($url);
-		exit;
-	}
-	
-	protected function redirectPost($url, $postFields) {
-		$this->save();
-		$this->assign(array(
-            'url'    		=> $url,
-			'postFields'	=> $postFields,
-		));
-		
-		$this->render('info.redirectPost.tpl');
-	}
+        $this->assign(array(
+            'LNG'            => $LNG,
+        ), false);
+        
+        $this->tplObj->display('extends:layout.'.$this->getWindow().'.tpl|'.$file);
+        exit;
+    }
+    
+    protected function sendJSON($data)
+    {
+        $this->save();
+        echo json_encode($data);
+        exit;
+    }
+    
+    protected function redirectTo($url)
+    {
+        $this->save();
+        HTTP::redirectTo($url);
+        exit;
+    }
+    
+    protected function redirectPost($url, $postFields)
+    {
+        $this->save();
+        $this->assign(array(
+            'url'            => $url,
+            'postFields'    => $postFields,
+        ));
+        
+        $this->render('info.redirectPost.tpl');
+    }
 }

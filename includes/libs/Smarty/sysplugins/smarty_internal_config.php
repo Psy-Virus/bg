@@ -19,7 +19,8 @@
  * @property Smarty_Config_Compiled $compiled
  * @ignore
  */
-class Smarty_Internal_Config {
+class Smarty_Internal_Config
+{
 
     /**
      * Samrty instance
@@ -296,7 +297,6 @@ class Smarty_Internal_Config {
 
         throw new SmartyException("config attribute '$property_name' does not exist.");
     }
-
 }
 
 ?>

@@ -33,45 +33,46 @@ define('INSIDE', true );
 define("BETA", false);
 define('ROOT_PATH', str_replace('\\', '/', dirname(__FILE__)).'/');
 require_once(ROOT_PATH . 'includes/config.php');
-require_once(ROOT_PATH . 'includes/constants.php');	
+require_once(ROOT_PATH . 'includes/constants.php');
 require_once(ROOT_PATH . 'includes/classes/class.MySQLi.php');
-$db 	= new DB_MySQLi();
+$db    = new DB_MySQLi();
 
-$RW		= $db->query("SELECT rid, raport FROM ".RW.";");
+$RW        = $db->query("SELECT rid, raport FROM ".RW.";");
 
-while($raport = $db->fetch_array($RW)) {
-	$OLD	= unserialize($raport['raport']);
-	$NEW 	= $OLD;
+while ($raport = $db->fetch_array($RW)) {
+    $OLD    = unserialize($raport['raport']);
+    $NEW    = $OLD;
 
-	unset($NEW['rounds']);
+    unset($NEW['rounds']);
 
-	foreach($OLD['rounds'] as $Key => $OldRounds) {
-		foreach($OldRounds['attacker'] as $PlayerID => $Player) {
-			if(isset($Player['userID'])) {
-				$Temp	= $Player;
-			} else {
-				$Temp	= array();
-				$Temp['userID']	= $PlayerID;
-				$Temp['ships']	= $Player;
-			}
-			$NEW['rounds'][$Key]['attacker'][]	= $Temp;
-		}
-		foreach($OldRounds['defender'] as $PlayerID => $Player) {
-			if(isset($Player['userID'])) {
-				$Temp	= $Player;
-			} else {
-				$Temp	= array();
-				$Temp['userID']	= $PlayerID;
-				$Temp['ships']	= $Player;
-			}
-			
-			$NEW['rounds'][$Key]['defender'][]	= $Temp;
-		}
-		if(isset($OldRounds['info']))
-			$NEW['rounds'][$Key]['info']	= $OldRounds['info'];
-		else
-			$NEW['rounds'][$Key]['info']	= array(NULL, NULL, NULL, NULL);
-	}
-	$db->query("UPDATE ".RW." SET raport = '".serialize($NEW)."' WHERE rid = ".$raport['rid'].";");
+    foreach ($OLD['rounds'] as $Key => $OldRounds) {
+        foreach ($OldRounds['attacker'] as $PlayerID => $Player) {
+            if (isset($Player['userID'])) {
+                $Temp    = $Player;
+            } else {
+                $Temp    = array();
+                $Temp['userID']    = $PlayerID;
+                $Temp['ships']    = $Player;
+            }
+            $NEW['rounds'][$Key]['attacker'][]    = $Temp;
+        }
+        foreach ($OldRounds['defender'] as $PlayerID => $Player) {
+            if (isset($Player['userID'])) {
+                $Temp    = $Player;
+            } else {
+                $Temp    = array();
+                $Temp['userID']    = $PlayerID;
+                $Temp['ships']    = $Player;
+            }
+            
+            $NEW['rounds'][$Key]['defender'][]    = $Temp;
+        }
+        if (isset($OldRounds['info'])) {
+            $NEW['rounds'][$Key]['info']    = $OldRounds['info'];
+        } else {
+            $NEW['rounds'][$Key]['info']    = array(NULL, NULL, NULL, NULL);
+        }
+    }
+    $db->query("UPDATE ".RW." SET raport = '".serialize($NEW)."' WHERE rid = ".$raport['rid'].";");
 }
-	exit("Done");
+    exit("Done");

@@ -29,42 +29,42 @@
 
 class TrackingCronjob
 {
-	function run()
-	{
-		$serverData['php']			= PHP_VERSION;
-		
-		try {
-			$serverData['installSince']	= $GLOBALS['DATABASE']->getFirstCell("SELECT register_time FROM ".USERS." WHERE id = ".ROOT_USER);
-		} catch (Exception $e) {
-			$serverData['installSince']	= NULL;
-		}
-		
-		try {
-			$serverData['users']		= $GLOBALS['DATABASE']->getFirstCell("SELECT COUNT(*) FROM ".USERS.";");
-		} catch (Exception $e) {
-			$serverData['users']		= NULL;
-		}
-		
-		try {
-			$serverData['unis']			= $GLOBALS['DATABASE']->getFirstCell("SELECT COUNT(*) FROM ".CONFIG.";");
-		} catch (Exception $e) {
-			$serverData['unis']			= NULL;
-		}
-		
-		try {
-			$serverData['version']		= Config::get('VERSION');
-		} catch (Exception $e) {
-			$serverData['version']		= NULL;
-		}
-		
-		$this->ch	= curl_init('http://tracking.2moons.cc/');
-		curl_setopt($this->ch, CURLOPT_HTTPGET, true);
-		curl_setopt($this->ch, CURLOPT_AUTOREFERER, true);
-		curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($this->ch, CURLOPT_POSTFIELDS, $serverData);
-		curl_setopt($this->ch, CURLOPT_USERAGENT, "Mozilla/5.0 (compatible; 2Moons/".Config::get('VERSION')."; +http://2moons.cc)");
-		
-		curl_exec($this->ch);
-		curl_close($this->ch);
-	}
+    public function run()
+    {
+        $serverData['php']            = PHP_VERSION;
+        
+        try {
+            $serverData['installSince']    = $GLOBALS['DATABASE']->getFirstCell("SELECT register_time FROM ".USERS." WHERE id = ".ROOT_USER);
+        } catch (Exception $e) {
+            $serverData['installSince']    = NULL;
+        }
+        
+        try {
+            $serverData['users']        = $GLOBALS['DATABASE']->getFirstCell("SELECT COUNT(*) FROM ".USERS.";");
+        } catch (Exception $e) {
+            $serverData['users']        = NULL;
+        }
+        
+        try {
+            $serverData['unis']            = $GLOBALS['DATABASE']->getFirstCell("SELECT COUNT(*) FROM ".CONFIG.";");
+        } catch (Exception $e) {
+            $serverData['unis']            = NULL;
+        }
+        
+        try {
+            $serverData['version']        = Config::get('VERSION');
+        } catch (Exception $e) {
+            $serverData['version']        = NULL;
+        }
+        
+        $this->ch    = curl_init('http://tracking.2moons.cc/');
+        curl_setopt($this->ch, CURLOPT_HTTPGET, true);
+        curl_setopt($this->ch, CURLOPT_AUTOREFERER, true);
+        curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($this->ch, CURLOPT_POSTFIELDS, $serverData);
+        curl_setopt($this->ch, CURLOPT_USERAGENT, "Mozilla/5.0 (compatible; 2Moons/".Config::get('VERSION')."; +http://2moons.cc)");
+        
+        curl_exec($this->ch);
+        curl_close($this->ch);
+    }
 }

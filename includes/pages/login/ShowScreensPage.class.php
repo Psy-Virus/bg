@@ -31,38 +31,37 @@
 
 class ShowScreensPage extends AbstractPage
 {
-	public static $requireModule = 0;
+    public static $requireModule = 0;
 
-	function __construct() 
-	{
-		parent::__construct();
-	}
-	
-	function show() 
-	{
-		$screenshots	= array();
-		$directoryIterator = new DirectoryIterator('styles/resource/images/login/screens/');
-        foreach ($directoryIterator as $fileinfo) { 
-            if (!$fileinfo->isFile())
-			{
-				continue;
-            }			
-			
-			$thumbnail = 'styles/resource/images/login/screens/'.$fileinfo->getFilename();
-			if(file_exists('styles/resource/images/login/screens/thumbnails/'.$fileinfo->getFilename()))
-			{
-				$thumbnail = 'styles/resource/images/login/screens/thumbnails/'.$fileinfo->getFilename();
-			}
-			
-			$screenshots[]	= array(
-				'path' 		=> 'styles/resource/images/login/screens/'.$fileinfo->getFilename(),
-				'thumbnail' => $thumbnail,
-			);
-		}
-		
-		$this->assign(array(
-			'screenshots' => $screenshots
-		));;
-		$this->render('page.screens.default.tpl');
-	}
+    public function __construct()
+    {
+        parent::__construct();
+    }
+    
+    public function show()
+    {
+        $screenshots    = array();
+        $directoryIterator = new DirectoryIterator('styles/resource/images/login/screens/');
+        foreach ($directoryIterator as $fileinfo) {
+            if (!$fileinfo->isFile()) {
+                continue;
+            }
+            
+            $thumbnail = 'styles/resource/images/login/screens/'.$fileinfo->getFilename();
+            if (file_exists('styles/resource/images/login/screens/thumbnails/'.$fileinfo->getFilename())) {
+                $thumbnail = 'styles/resource/images/login/screens/thumbnails/'.$fileinfo->getFilename();
+            }
+            
+            $screenshots[]    = array(
+                'path'        => 'styles/resource/images/login/screens/'.$fileinfo->getFilename(),
+                'thumbnail' => $thumbnail,
+            );
+        }
+        
+        $this->assign(array(
+            'screenshots' => $screenshots
+        ));
+        ;
+        $this->render('page.screens.default.tpl');
+    }
 }

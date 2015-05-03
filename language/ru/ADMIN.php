@@ -211,7 +211,7 @@ $LNG['bo_total_users']                 = 'Всего игроков: ';
 $LNG['bo_total_banneds']               = 'Заблокированных игроков: ';
 $LNG['bo_ban']                         = 'Заблокировать';
 $LNG['bo_unban']                       = 'Разблокировать';
-	
+    
 // MD5 шифрование
 $LNG['et_md5_encripter']               = 'MD5 шифрование';
 $LNG['et_pass']                        = 'Текст';
@@ -565,7 +565,7 @@ $LNG['mu_game_info']                   = 'Информация';
 $LNG['mu_vaild_users']                 = 'Активация игроков';
 $LNG['mu_news']                        = 'Новости';
 $LNG['mu_multiip_page']                = 'Мультиаккаунты';
-$LNG['mu_clear_cache']				   = 'Очистить кэш';
+$LNG['mu_clear_cache']                   = 'Очистить кэш';
 $LNG['mu_vertify']                     = 'Сверить хэши файлов';
 $LNG['mu_cronjob']                     = 'Планировщик задач';
 $LNG['mu_logs']                        = 'Логи';
@@ -591,7 +591,7 @@ $LNG['vt_fileerror']                   = 'Ошибка';
 $LNG['vt_loadfile']                    = 'Загрузить список файлов';
 
 // Кэш
-$LNG['cc_cache_clear']				   = 'Кэш очищен.';
+$LNG['cc_cache_clear']                   = 'Кэш очищен.';
 
 // Обнуление вселенной
 $LNG['re_reset_universe']              = 'Обнуление вселенной';

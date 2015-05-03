@@ -28,128 +28,115 @@
  
 class Config
 {
-	#static private $uniConfig;
-	#static private $gameConfig;
-	static private $config;
-	
-	static function init()
-	{	
-		$configResult = $GLOBALS['DATABASE']->query("SELECT * FROM ".CONFIG.";");
+    #static private $uniConfig;
+    #static private $gameConfig;
+    private static $config;
+    
+    public static function init()
+    {
+        $configResult = $GLOBALS['DATABASE']->query("SELECT * FROM ".CONFIG.";");
 
-		while($configRow = $GLOBALS['DATABASE']->fetch_array($configResult))
-		{
-			$configRow['moduls']		= explode(";", $configRow['moduls']);
-			self::$config[$configRow['uni']]	= $configRow;
-		}
+        while ($configRow = $GLOBALS['DATABASE']->fetch_array($configResult)) {
+            $configRow['moduls']        = explode(";", $configRow['moduls']);
+            self::$config[$configRow['uni']]    = $configRow;
+        }
 
-		$GLOBALS['DATABASE']->free_result($configResult);
-	}
-	
-	static function setGlobals()
-	{	
-		// BC Wrapper
-		$GLOBALS['CONFIG']	= self::$config;
-		$GLOBALS['CONF']	= self::$config[$GLOBALS['UNI']];
-	}
-	
-	static function get($key, $universe = NULL)
-	{
-		if(is_null($universe) || !isset(self::$config[$universe]))
-		{
-			$universe	= $GLOBALS['UNI'];
-		}
-		
-		if(isset(self::$config[$universe][$key]))
-		{
-			return self::$config[$universe][$key];
-		}
-		
-		
-		/* New Config
-		if(is_null($universe) || !isset(self::$uniConfig[$universe]))
-		{
-			$universe	= $GLOBALS['UNI'];
-		}
-		
-		if(isset(self::$uniConfig[$universe][$key]))
-		{
-			return self::$uniConfig[$universe][$key];
-		}
-		
-		if(isset(self::$gameConfig[$key]))
-		{
-			return self::$gameConfig[$key];
-		}
-		*/
-		throw new Exception("Unkown Config Key ".$key."!");
-	}
-	
-	static function getAll($configType, $universe = NULL)
-	{
-		switch($configType)
-		{
-			default:
-				if(is_null($universe) || !isset(self::$config[$universe])) {
-					return self::$config;
-				}
-				else {
-					return self::$config[$universe];
-				}
-			break;
-			/* New Config
-			case 'universe':
-				return self::$uniConfig;
-			break;
-			case 'global':
-				return self::$gameConfig;
-			break; */
-		}
-		
-		throw new Exception("Unkown ConfigType ".$configType."!");
-	}
-	
-	static function update($newConfig, $universe = NULL)
-	{
-		if(is_null($universe) || !isset(self::$config[$universe])) {
-			$universe	= $GLOBALS['UNI'];
-		}
-		
-		$gameUpdate			= array();
-		$uniUpdate			= array();
-		
-		foreach($newConfig as $configKey => $value)
-		{
-			if(!isset(self::$config[$universe][$configKey]))
-			{
-				throw new Exception("Unkown Config Key ".$configKey."!");
-			}
-			
-			if(in_array($configKey, $GLOBALS['BASICCONFIG']))
-			{
-				foreach(array_keys(self::$config) as $uniID)
-				{
-					self::$config[$uniID][$configKey]	= $value;
-				}
-				$gameUpdate[]	= $configKey." = '".$GLOBALS['DATABASE']->escape($value)."'";
-			}
-			else
-			{
-				self::$config[$universe][$configKey]	= $value;
-				$uniUpdate[]	= $configKey." = '".$GLOBALS['DATABASE']->escape($value)."'";
-			}
-		}
-		
-		if(!empty($uniUpdate))
-		{
-			$GLOBALS['DATABASE']->query("UPDATE ".CONFIG." SET ".implode(', ', $uniUpdate)." WHERE uni = ".$universe.";");
-		}
-		
-		if(!empty($gameUpdate))
-		{
-			$GLOBALS['DATABASE']->query("UPDATE ".CONFIG." SET ".implode(', ', $gameUpdate).";");
-		}
-		
-		$GLOBALS['CONFIG']	= self::$config;
-		$GLOBALS['CONF']	= self::$config[$GLOBALS['UNI']];
-	}
+        $GLOBALS['DATABASE']->free_result($configResult);
+    }
+    
+    public static function setGlobals()
+    {
+        // BC Wrapper
+        $GLOBALS['CONFIG']    = self::$config;
+        $GLOBALS['CONF']    = self::$config[$GLOBALS['UNI']];
+    }
+    
+    public static function get($key, $universe = NULL)
+    {
+        if (is_null($universe) || !isset(self::$config[$universe])) {
+            $universe    = $GLOBALS['UNI'];
+        }
+        
+        if (isset(self::$config[$universe][$key])) {
+            return self::$config[$universe][$key];
+        }
+        
+        
+        /* New Config
+        if(is_null($universe) || !isset(self::$uniConfig[$universe]))
+        {
+            $universe	= $GLOBALS['UNI'];
+        }
+        
+        if(isset(self::$uniConfig[$universe][$key]))
+        {
+            return self::$uniConfig[$universe][$key];
+        }
+        
+        if(isset(self::$gameConfig[$key]))
+        {
+            return self::$gameConfig[$key];
+        }
+        */
+        throw new Exception("Unkown Config Key ".$key."!");
+    }
+    
+    public static function getAll($configType, $universe = NULL)
+    {
+        switch ($configType) {
+            default:
+                if (is_null($universe) || !isset(self::$config[$universe])) {
+                    return self::$config;
+                } else {
+                    return self::$config[$universe];
+                }
+            break;
+            /* New Config
+            case 'universe':
+                return self::$uniConfig;
+            break;
+            case 'global':
+                return self::$gameConfig;
+            break; */
+        }
+        
+        throw new Exception("Unkown ConfigType ".$configType."!");
+    }
+    
+    public static function update($newConfig, $universe = NULL)
+    {
+        if (is_null($universe) || !isset(self::$config[$universe])) {
+            $universe    = $GLOBALS['UNI'];
+        }
+        
+        $gameUpdate            = array();
+        $uniUpdate            = array();
+        
+        foreach ($newConfig as $configKey => $value) {
+            if (!isset(self::$config[$universe][$configKey])) {
+                throw new Exception("Unkown Config Key ".$configKey."!");
+            }
+            
+            if (in_array($configKey, $GLOBALS['BASICCONFIG'])) {
+                foreach (array_keys(self::$config) as $uniID) {
+                    self::$config[$uniID][$configKey]    = $value;
+                }
+                $gameUpdate[]    = $configKey." = '".$GLOBALS['DATABASE']->escape($value)."'";
+            } else {
+                self::$config[$universe][$configKey]    = $value;
+                $uniUpdate[]    = $configKey." = '".$GLOBALS['DATABASE']->escape($value)."'";
+            }
+        }
+        
+        if (!empty($uniUpdate)) {
+            $GLOBALS['DATABASE']->query("UPDATE ".CONFIG." SET ".implode(', ', $uniUpdate)." WHERE uni = ".$universe.";");
+        }
+        
+        if (!empty($gameUpdate)) {
+            $GLOBALS['DATABASE']->query("UPDATE ".CONFIG." SET ".implode(', ', $gameUpdate).";");
+        }
+        
+        $GLOBALS['CONFIG']    = self::$config;
+        $GLOBALS['CONF']    = self::$config[$GLOBALS['UNI']];
+    }
 }

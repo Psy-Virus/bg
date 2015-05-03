@@ -26,48 +26,47 @@
  * @link http://2moons.cc/
  */
 class MissionCaseTransport extends MissionFunctions
-{		
-	function __construct($Fleet)
-	{
-		$this->_fleet	= $Fleet;
-	}
-	
-	function TargetEvent()
-	{
-		$StartPlanet	= $GLOBALS['DATABASE']->getFirstRow("SELECT name FROM ".PLANETS." WHERE `id` = '". $this->_fleet['fleet_start_id'] ."';");
-		$StartName		= $StartPlanet['name'];
-		$StartOwner		= $this->_fleet['fleet_owner'];
+{
+    public function __construct($Fleet)
+    {
+        $this->_fleet    = $Fleet;
+    }
+    
+    public function TargetEvent()
+    {
+        $StartPlanet    = $GLOBALS['DATABASE']->getFirstRow("SELECT name FROM ".PLANETS." WHERE `id` = '". $this->_fleet['fleet_start_id'] ."';");
+        $StartName        = $StartPlanet['name'];
+        $StartOwner        = $this->_fleet['fleet_owner'];
 
-		$TargetPlanet	= $GLOBALS['DATABASE']->getFirstRow("SELECT name FROM ".PLANETS." WHERE `id` = '". $this->_fleet['fleet_end_id'] ."';");
-		$TargetName		= $TargetPlanet['name'];
-		$TargetOwner	= $this->_fleet['fleet_target_owner'];
-		
-		$LNG			= $this->getLanguage(NULL, $StartOwner);
-		$Message		= sprintf($LNG['sys_tran_mess_owner'], $TargetName, GetTargetAdressLink($this->_fleet, ''), pretty_number($this->_fleet['fleet_resource_metal']), $LNG['tech'][901], pretty_number($this->_fleet['fleet_resource_crystal']), $LNG['tech'][902], pretty_number($this->_fleet['fleet_resource_deuterium']), $LNG['tech'][903]);
-		SendSimpleMessage($StartOwner, 0, $this->_fleet['fleet_start_time'], 5, $LNG['sys_mess_tower'], $LNG['sys_mess_transport'], $Message);
-		if ($TargetOwner != $StartOwner) 
-		{
-			$LNG			= $this->getLanguage(NULL, $TargetOwner);
-			$Message        = sprintf($LNG['sys_tran_mess_user'], $StartName, GetStartAdressLink($this->_fleet, ''), $TargetName, GetTargetAdressLink($this->_fleet, ''), pretty_number($this->_fleet['fleet_resource_metal']), $LNG['tech'][901], pretty_number($this->_fleet['fleet_resource_crystal']), $LNG['tech'][902], pretty_number($this->_fleet['fleet_resource_deuterium']), $LNG['tech'][903] );
-			SendSimpleMessage($TargetOwner, 0, $this->_fleet['fleet_start_time'], 5, $LNG['sys_mess_tower'], $LNG['sys_mess_transport'], $Message);
-		}
-	
-		$this->StoreGoodsToPlanet();
-		$this->setState(FLEET_RETURN);
-		$this->SaveFleet();
-	}
-	
-	function EndStayEvent()
-	{
-		return;
-	}
-	
-	function ReturnEvent()
-	{
-		$LNG		= $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
-		$StartName	= $GLOBALS['DATABASE']->getFirstCell("SELECT name FROM ".PLANETS." WHERE id = ".$this->_fleet['fleet_start_id'].";");
-		$Message	= sprintf($LNG['sys_tran_mess_back'], $StartName, GetStartAdressLink($this->_fleet, ''));
-		SendSimpleMessage($this->_fleet['fleet_owner'], 0, $this->_fleet['fleet_end_time'], 5, $LNG['sys_mess_tower'], $LNG['sys_mess_fleetback'], $Message);
-		$this->RestoreFleet();
-	}
+        $TargetPlanet    = $GLOBALS['DATABASE']->getFirstRow("SELECT name FROM ".PLANETS." WHERE `id` = '". $this->_fleet['fleet_end_id'] ."';");
+        $TargetName        = $TargetPlanet['name'];
+        $TargetOwner    = $this->_fleet['fleet_target_owner'];
+        
+        $LNG            = $this->getLanguage(NULL, $StartOwner);
+        $Message        = sprintf($LNG['sys_tran_mess_owner'], $TargetName, GetTargetAdressLink($this->_fleet, ''), pretty_number($this->_fleet['fleet_resource_metal']), $LNG['tech'][901], pretty_number($this->_fleet['fleet_resource_crystal']), $LNG['tech'][902], pretty_number($this->_fleet['fleet_resource_deuterium']), $LNG['tech'][903]);
+        SendSimpleMessage($StartOwner, 0, $this->_fleet['fleet_start_time'], 5, $LNG['sys_mess_tower'], $LNG['sys_mess_transport'], $Message);
+        if ($TargetOwner != $StartOwner) {
+            $LNG            = $this->getLanguage(NULL, $TargetOwner);
+            $Message        = sprintf($LNG['sys_tran_mess_user'], $StartName, GetStartAdressLink($this->_fleet, ''), $TargetName, GetTargetAdressLink($this->_fleet, ''), pretty_number($this->_fleet['fleet_resource_metal']), $LNG['tech'][901], pretty_number($this->_fleet['fleet_resource_crystal']), $LNG['tech'][902], pretty_number($this->_fleet['fleet_resource_deuterium']), $LNG['tech'][903] );
+            SendSimpleMessage($TargetOwner, 0, $this->_fleet['fleet_start_time'], 5, $LNG['sys_mess_tower'], $LNG['sys_mess_transport'], $Message);
+        }
+    
+        $this->StoreGoodsToPlanet();
+        $this->setState(FLEET_RETURN);
+        $this->SaveFleet();
+    }
+    
+    public function EndStayEvent()
+    {
+        return;
+    }
+    
+    public function ReturnEvent()
+    {
+        $LNG        = $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
+        $StartName    = $GLOBALS['DATABASE']->getFirstCell("SELECT name FROM ".PLANETS." WHERE id = ".$this->_fleet['fleet_start_id'].";");
+        $Message    = sprintf($LNG['sys_tran_mess_back'], $StartName, GetStartAdressLink($this->_fleet, ''));
+        SendSimpleMessage($this->_fleet['fleet_owner'], 0, $this->_fleet['fleet_end_time'], 5, $LNG['sys_mess_tower'], $LNG['sys_mess_fleetback'], $Message);
+        $this->RestoreFleet();
+    }
 }

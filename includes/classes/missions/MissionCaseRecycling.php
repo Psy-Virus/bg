@@ -28,107 +28,101 @@
 
 class MissionCaseRecycling extends MissionFunctions
 {
-	function __construct($Fleet)
-	{
-		$this->_fleet	= $Fleet;
-	}
-	
-	function TargetEvent()
-	{	
-		global $pricelist, $reslist, $resource;
-		
-		$resourceIDs	= array(901, 902, 903, 921);
-		$debrisIDs		= array(901, 902);
-		$resQuery		= array();
-		$collectQuery	= array();
-		
-		$collectedGoods = array();
-		
-		foreach($debrisIDs as $debrisID)
-		{
-			$collectedGoods[$debrisID] = 0;
-			$resQuery[]	= 'der_'.$resource[$debrisID];
-		}
-		
-		$targetData	= $GLOBALS['DATABASE']->getFirstRow("SELECT ".implode(',', $resQuery).", (".implode(' + ', $resQuery).") as total FROM ".PLANETS." WHERE id = ".$this->_fleet['fleet_end_id'].";");
-		if(!empty($targetData['total']))
-		{
-			$targetUser			= $GLOBALS['DATABASE']->getFirstRow("SELECT * FROM ".USERS." WHERE id = ".$this->_fleet['fleet_owner'].";");
-			$targetUserFactors	= getFactors($targetUser);
-			$shipStorageFactor	= 1 + $targetUserFactors['ShipStorage'];
-		
-			// Get fleet capacity
-			$fleetData	= explode(";", $this->_fleet['fleet_array']);
+    public function __construct($Fleet)
+    {
+        $this->_fleet    = $Fleet;
+    }
+    
+    public function TargetEvent()
+    {
+        global $pricelist, $reslist, $resource;
+        
+        $resourceIDs    = array(901, 902, 903, 921);
+        $debrisIDs        = array(901, 902);
+        $resQuery        = array();
+        $collectQuery    = array();
+        
+        $collectedGoods = array();
+        
+        foreach ($debrisIDs as $debrisID) {
+            $collectedGoods[$debrisID] = 0;
+            $resQuery[]    = 'der_'.$resource[$debrisID];
+        }
+        
+        $targetData    = $GLOBALS['DATABASE']->getFirstRow("SELECT ".implode(',', $resQuery).", (".implode(' + ', $resQuery).") as total FROM ".PLANETS." WHERE id = ".$this->_fleet['fleet_end_id'].";");
+        if (!empty($targetData['total'])) {
+            $targetUser            = $GLOBALS['DATABASE']->getFirstRow("SELECT * FROM ".USERS." WHERE id = ".$this->_fleet['fleet_owner'].";");
+            $targetUserFactors    = getFactors($targetUser);
+            $shipStorageFactor    = 1 + $targetUserFactors['ShipStorage'];
+        
+            // Get fleet capacity
+            $fleetData    = explode(";", $this->_fleet['fleet_array']);
 
-			$recyclerStorage	= 0;
-			$otherFleetStorage	= 0;
-			
-			foreach ($fleetData as $fleetRow)
-			{
-				if (empty($fleetRow)) continue;
-					
-				$temp        = explode (",", $fleetRow);
+            $recyclerStorage    = 0;
+            $otherFleetStorage    = 0;
+            
+            foreach ($fleetData as $fleetRow) {
+                if (empty($fleetRow)) {
+                    continue;
+                }
+                    
+                $temp        = explode (",", $fleetRow);
 
-				if ($temp[0] == 209 || $temp[0] == 219)
-				{
-					$recyclerStorage   += $pricelist[$temp[0]]['capacity'] * $temp[1];
-				}
-				else
-				{
-					$otherFleetStorage += $pricelist[$temp[0]]['capacity'] * $temp[1];
-				}
-			}
-			
-			$recyclerStorage	*= $shipStorageFactor;
-			$otherFleetStorage	*= $shipStorageFactor;
-			
-			unset($temp);
+                if ($temp[0] == 209 || $temp[0] == 219) {
+                    $recyclerStorage   += $pricelist[$temp[0]]['capacity'] * $temp[1];
+                } else {
+                    $otherFleetStorage += $pricelist[$temp[0]]['capacity'] * $temp[1];
+                }
+            }
+            
+            $recyclerStorage    *= $shipStorageFactor;
+            $otherFleetStorage    *= $shipStorageFactor;
+            
+            unset($temp);
 
-			$incomingGoods		= 0;
-			foreach($resourceIDs as $resourceID)
-			{
-				$incomingGoods	+= $this->_fleet['fleet_resource_'.$resource[$resourceID]];
-			}
-			
-			$totalStorage = $recyclerStorage + min(0, $otherFleetStorage - $incomingGoods);
+            $incomingGoods        = 0;
+            foreach ($resourceIDs as $resourceID) {
+                $incomingGoods    += $this->_fleet['fleet_resource_'.$resource[$resourceID]];
+            }
+            
+            $totalStorage = $recyclerStorage + min(0, $otherFleetStorage - $incomingGoods);
 
-			// fast way
-			$collectFactor	= min(1, $totalStorage / $targetData['total']);
-			foreach($debrisIDs as $debrisID)
-			{
-				$collectedGoods[$debrisID]	= ceil($targetData['der_'.$resource[$debrisID]] * $collectFactor);
-				$collectQuery[]				= 'der_'.$resource[$debrisID].' = GREATEST(0, der_'.$resource[$debrisID].' - '.$collectedGoods[$debrisID].')';
-				$this->UpdateFleet('fleet_resource_'.$resource[$debrisID], $this->_fleet['fleet_resource_'.$resource[$debrisID]] + $collectedGoods[$debrisID]);
-			}
-			
-			$GLOBALS['DATABASE']->query("UPDATE ".PLANETS." SET ".implode(',', $collectQuery)." WHERE id = ".$this->_fleet['fleet_end_id'].";");
-		}
-		
-		$LNG		= $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
-		
-		$Message 	= sprintf($LNG['sys_recy_gotten'], 
-							  pretty_number($collectedGoods[901]), $LNG['tech'][901], 
-							  pretty_number($collectedGoods[902]), $LNG['tech'][902]
-		);
-						
-		SendSimpleMessage($this->_fleet['fleet_owner'], 0, $this->_fleet['fleet_start_time'], 5, $LNG['sys_mess_tower'], $LNG['sys_recy_report'], $Message);
-		$this->setState(FLEET_RETURN);
-		$this->SaveFleet();
-	}
-	
-	function EndStayEvent()
-	{
-		return;
-	}
-	
-	function ReturnEvent()
-	{
-		$LNG		= $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
-		$TargetName	= $GLOBALS['DATABASE']->getFirstCell("SELECT name FROM ".PLANETS." WHERE id = ".$this->_fleet['fleet_start_id'].";");
-	
-		$Message	= sprintf($LNG['sys_tran_mess_owner'], $TargetName, GetStartAdressLink($this->_fleet, ''), pretty_number($this->_fleet['fleet_resource_metal']), $LNG['tech'][901], pretty_number($this->_fleet['fleet_resource_crystal']), $LNG['tech'][902], pretty_number($this->_fleet['fleet_resource_deuterium']), $LNG['tech'][903] );
-		SendSimpleMessage($this->_fleet['fleet_owner'], 0, $this->_fleet['fleet_end_time'], 5, $LNG['sys_mess_tower'], $LNG['sys_mess_fleetback'], $Message);
+            // fast way
+            $collectFactor    = min(1, $totalStorage / $targetData['total']);
+            foreach ($debrisIDs as $debrisID) {
+                $collectedGoods[$debrisID]    = ceil($targetData['der_'.$resource[$debrisID]] * $collectFactor);
+                $collectQuery[]                = 'der_'.$resource[$debrisID].' = GREATEST(0, der_'.$resource[$debrisID].' - '.$collectedGoods[$debrisID].')';
+                $this->UpdateFleet('fleet_resource_'.$resource[$debrisID], $this->_fleet['fleet_resource_'.$resource[$debrisID]] + $collectedGoods[$debrisID]);
+            }
+            
+            $GLOBALS['DATABASE']->query("UPDATE ".PLANETS." SET ".implode(',', $collectQuery)." WHERE id = ".$this->_fleet['fleet_end_id'].";");
+        }
+        
+        $LNG        = $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
+        
+        $Message    = sprintf($LNG['sys_recy_gotten'],
+                              pretty_number($collectedGoods[901]), $LNG['tech'][901],
+                              pretty_number($collectedGoods[902]), $LNG['tech'][902]
+        );
+                        
+        SendSimpleMessage($this->_fleet['fleet_owner'], 0, $this->_fleet['fleet_start_time'], 5, $LNG['sys_mess_tower'], $LNG['sys_recy_report'], $Message);
+        $this->setState(FLEET_RETURN);
+        $this->SaveFleet();
+    }
+    
+    public function EndStayEvent()
+    {
+        return;
+    }
+    
+    public function ReturnEvent()
+    {
+        $LNG        = $this->getLanguage(NULL, $this->_fleet['fleet_owner']);
+        $TargetName    = $GLOBALS['DATABASE']->getFirstCell("SELECT name FROM ".PLANETS." WHERE id = ".$this->_fleet['fleet_start_id'].";");
+    
+        $Message    = sprintf($LNG['sys_tran_mess_owner'], $TargetName, GetStartAdressLink($this->_fleet, ''), pretty_number($this->_fleet['fleet_resource_metal']), $LNG['tech'][901], pretty_number($this->_fleet['fleet_resource_crystal']), $LNG['tech'][902], pretty_number($this->_fleet['fleet_resource_deuterium']), $LNG['tech'][903] );
+        SendSimpleMessage($this->_fleet['fleet_owner'], 0, $this->_fleet['fleet_end_time'], 5, $LNG['sys_mess_tower'], $LNG['sys_mess_fleetback'], $Message);
 
-		$this->RestoreFleet();
-	}
+        $this->RestoreFleet();
+    }
 }

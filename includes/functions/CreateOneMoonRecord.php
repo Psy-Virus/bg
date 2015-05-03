@@ -28,30 +28,31 @@
 
 function CreateOneMoonRecord($Galaxy, $System, $Planet, $Universe, $Owner, $MoonName, $Chance, $time = 0, $Size = 0)
 {
-	global $USER;
+    global $USER;
 
-	$SQL  = "SELECT id_luna,planet_type,id,name,temp_max,temp_min FROM ".PLANETS." ";
-	$SQL .= "WHERE ";
-	$SQL .= "universe = '".$Universe."' AND ";
-	$SQL .= "galaxy = '".$Galaxy."' AND ";
-	$SQL .= "system = '".$System."' AND ";
-	$SQL .= "planet = '".$Planet."' AND ";
-	$SQL .= "planet_type = '1';";
-	$MoonPlanet = $GLOBALS['DATABASE']->getFirstRow($SQL);
+    $SQL  = "SELECT id_luna,planet_type,id,name,temp_max,temp_min FROM ".PLANETS." ";
+    $SQL .= "WHERE ";
+    $SQL .= "universe = '".$Universe."' AND ";
+    $SQL .= "galaxy = '".$Galaxy."' AND ";
+    $SQL .= "system = '".$System."' AND ";
+    $SQL .= "planet = '".$Planet."' AND ";
+    $SQL .= "planet_type = '1';";
+    $MoonPlanet = $GLOBALS['DATABASE']->getFirstRow($SQL);
 
-	if ($MoonPlanet['id_luna'] != 0)
-		return false;
+    if ($MoonPlanet['id_luna'] != 0) {
+        return false;
+    }
 
-	if($Size == 0) {
-		$size	= floor(pow(mt_rand(10, 20) + 3 * $Chance, 0.5) * 1000); # New Calculation - 23.04.2011
-	} else {
-		$size	= $Size;
-	}
-	
-	$maxtemp	= $MoonPlanet['temp_max'] - mt_rand(10, 45);
-	$mintemp	= $MoonPlanet['temp_min'] - mt_rand(10, 45);
+    if ($Size == 0) {
+        $size    = floor(pow(mt_rand(10, 20) + 3 * $Chance, 0.5) * 1000); # New Calculation - 23.04.2011
+    } else {
+        $size    = $Size;
+    }
+    
+    $maxtemp    = $MoonPlanet['temp_max'] - mt_rand(10, 45);
+    $mintemp    = $MoonPlanet['temp_min'] - mt_rand(10, 45);
 
-	$GLOBALS['DATABASE']->multi_query("INSERT INTO ".PLANETS." SET
+    $GLOBALS['DATABASE']->multi_query("INSERT INTO ".PLANETS." SET
 					  name = '".$MoonName."',
 					  id_owner = ".$Owner.",
 					  universe = ".$Universe.",
@@ -77,5 +78,5 @@ function CreateOneMoonRecord($Galaxy, $System, $Planet, $Universe, $Owner, $Moon
 					  WHERE
 					  id = ".$MoonPlanet['id'].";");
 
-	return true;
+    return true;
 }

@@ -29,24 +29,24 @@
 
 class ShowChangelogPage extends AbstractPage
 {
-	public static $requireModule = 0;
+    public static $requireModule = 0;
 
-	function __construct() 
-	{
-		parent::__construct();
-	}
-	
-	function show() 
-	{
-		global $USER, $PLANET, $LNG;
+    public function __construct()
+    {
+        parent::__construct();
+    }
+    
+    public function show()
+    {
+        global $USER, $PLANET, $LNG;
 
 
 
-		$LNG->includeData(array('CHANGELOG'));	
-		$this->tplObj->assign_vars(array(	
-			'ChangelogList'	=> array_map('makebr', $LNG['changelog']),
-		));
-		
-		$this->display('page.changelog.default.tpl');
-	}
+        $LNG->includeData(array('CHANGELOG'));
+        $this->tplObj->assign_vars(array(
+            'ChangelogList'    => array_map('makebr', $LNG['changelog']),
+        ));
+        
+        $this->display('page.changelog.default.tpl');
+    }
 }

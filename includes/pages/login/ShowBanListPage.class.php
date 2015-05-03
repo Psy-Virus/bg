@@ -28,55 +28,53 @@
  * @link http://2moons.cc/
  */
 
-class ShowBanListPage extends AbstractPage 
+class ShowBanListPage extends AbstractPage
 {
-	public static $requireModule = MODULE_BANLIST;
+    public static $requireModule = MODULE_BANLIST;
 
-	function __construct() 
-	{
-		parent::__construct();
-	}
+    public function __construct()
+    {
+        parent::__construct();
+    }
 
-	function show()
-	{		
-		$universeSelect	= array();
-		
-		$page  		= HTTP::_GP('side', 1);
-		$banCount	= $GLOBALS['DATABASE']->getFirstCell("SELECT COUNT(*) FROM ".BANNED." WHERE universe = ".$GLOBALS['UNI']." ORDER BY time DESC;");
-		
-		$maxPage	= ceil($banCount / BANNED_USERS_PER_PAGE);
-		$page		= max(1, min($page, $maxPage));
-		
-		$banResult	= $GLOBALS['DATABASE']->query("SELECT * FROM ".BANNED." WHERE universe = ".$GLOBALS['UNI']." ORDER BY time DESC LIMIT ".(($page - 1) * BANNED_USERS_PER_PAGE).", ".BANNED_USERS_PER_PAGE.";");
-		$banList	= array();
-		
-		while($banRow = $GLOBALS['DATABASE']->fetchArray($banResult))
-		{
-			$banList[]	= array(
-				'player'	=> $banRow['who'],
-				'theme'		=> $banRow['theme'],
-				'from'		=> _date(t('php_tdformat'), $banRow['time'], Config::get('timezone')),
-				'to'		=> _date(t('php_tdformat'), $banRow['longer'], Config::get('timezone')),
-				'admin'		=> $banRow['author'],
-				'mail'		=> $banRow['email'],
-				'info'		=> t('bn_writemail', $banRow['author']),
-			);
-		}
-		
-		$uniAllConfig	= Config::getAll('universe');
-		foreach($uniAllConfig as $uniID => $uniConfig)
-		{
-			$universeSelect[$uniID]	= $uniConfig['uni_name'];
-		}
-		
-		$this->assign(array(
-			'universeSelect'	=> $universeSelect,
-			'banList'			=> $banList,
-			'banCount'			=> $banCount,
-			'page'				=> $page,
-			'maxPage'			=> $maxPage,
-		));
-		
-		$this->render('page.banList.default.tpl');
-	}
+    public function show()
+    {
+        $universeSelect    = array();
+        
+        $page        = HTTP::_GP('side', 1);
+        $banCount    = $GLOBALS['DATABASE']->getFirstCell("SELECT COUNT(*) FROM ".BANNED." WHERE universe = ".$GLOBALS['UNI']." ORDER BY time DESC;");
+        
+        $maxPage    = ceil($banCount / BANNED_USERS_PER_PAGE);
+        $page        = max(1, min($page, $maxPage));
+        
+        $banResult    = $GLOBALS['DATABASE']->query("SELECT * FROM ".BANNED." WHERE universe = ".$GLOBALS['UNI']." ORDER BY time DESC LIMIT ".(($page - 1) * BANNED_USERS_PER_PAGE).", ".BANNED_USERS_PER_PAGE.";");
+        $banList    = array();
+        
+        while ($banRow = $GLOBALS['DATABASE']->fetchArray($banResult)) {
+            $banList[]    = array(
+                'player'    => $banRow['who'],
+                'theme'        => $banRow['theme'],
+                'from'        => _date(t('php_tdformat'), $banRow['time'], Config::get('timezone')),
+                'to'        => _date(t('php_tdformat'), $banRow['longer'], Config::get('timezone')),
+                'admin'        => $banRow['author'],
+                'mail'        => $banRow['email'],
+                'info'        => t('bn_writemail', $banRow['author']),
+            );
+        }
+        
+        $uniAllConfig    = Config::getAll('universe');
+        foreach ($uniAllConfig as $uniID => $uniConfig) {
+            $universeSelect[$uniID]    = $uniConfig['uni_name'];
+        }
+        
+        $this->assign(array(
+            'universeSelect'    => $universeSelect,
+            'banList'            => $banList,
+            'banCount'            => $banCount,
+            'page'                => $page,
+            'maxPage'            => $maxPage,
+        ));
+        
+        $this->render('page.banList.default.tpl');
+    }
 }

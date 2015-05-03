@@ -29,67 +29,62 @@
 
 class ShowFleetDealerPage extends AbstractPage
 {
-	public static $requireModule = MODULE_FLEET_TRADER;
+    public static $requireModule = MODULE_FLEET_TRADER;
 
-	function __construct() 
-	{
-		parent::__construct();
-	}
-	
-	public function send()
-	{
-		global $USER, $PLANET, $LNG, $CONF, $pricelist, $resource, $reslist;
-		
-		$shipID			= HTTP::_GP('shipID', 0);
-		$Count			= max(0, round(HTTP::_GP('count', 0.0)));
-		$allowedShipIDs	= explode(',', Config::get('trade_allowed_ships'));
-		
-		if(!empty($shipID) && in_array($shipID, $allowedShipIDs) && $PLANET[$resource[$shipID]] >= $Count)
-		{
-			$PLANET[$resource[901]]			+= $Count * $pricelist[$shipID]['cost'][901] * (1 - (Config::get('trade_charge') / 100));
-			$PLANET[$resource[902]]			+= $Count * $pricelist[$shipID]['cost'][902] * (1 - (Config::get('trade_charge') / 100));
-			$PLANET[$resource[903]]			+= $Count * $pricelist[$shipID]['cost'][903] * (1 - (Config::get('trade_charge') / 100));
-			$USER[$resource[921]]			+= $Count * $pricelist[$shipID]['cost'][921] * (1 - (Config::get('trade_charge') / 100));
-			
-			$PLANET[$resource[$shipID]]		-= $Count;
-			
-			$GLOBALS['DATABASE']->query("UPDATE ".PLANETS." SET ".$resource[$shipID]." = ".$resource[$shipID]." - ".$Count." WHERE id = ".$PLANET['id'].";");
-			$this->printMessage($LNG['tr_exchange_done'], array("game.php?page=fleettrader", 3));
-		}
-		else
-		{
-			$this->printMessage($LNG['tr_exchange_error'], array("game.php?page=fleettrader", 3));
-		}
-		
-	}
-	
-	function show()
-	{
-		global $PLANET, $LNG, $CONF, $pricelist, $resource, $reslist;
-		
-		$Cost		= array();
-		
-		$allowedShipIDs	= explode(',', Config::get('trade_allowed_ships'));
-		
-		foreach($allowedShipIDs as $shipID)
-		{
-			if(in_array($shipID, $reslist['fleet']) || in_array($shipID, $reslist['defense'])) {
-				$Cost[$shipID]	= array($PLANET[$resource[$shipID]], $LNG['tech'][$shipID], $pricelist[$shipID]['cost']);
-			}
-		}
-		
-		if(empty($Cost)) {
-			$this->printMessage($LNG['ft_empty']);
-		}
+    public function __construct()
+    {
+        parent::__construct();
+    }
+    
+    public function send()
+    {
+        global $USER, $PLANET, $LNG, $CONF, $pricelist, $resource, $reslist;
+        
+        $shipID            = HTTP::_GP('shipID', 0);
+        $Count            = max(0, round(HTTP::_GP('count', 0.0)));
+        $allowedShipIDs    = explode(',', Config::get('trade_allowed_ships'));
+        
+        if (!empty($shipID) && in_array($shipID, $allowedShipIDs) && $PLANET[$resource[$shipID]] >= $Count) {
+            $PLANET[$resource[901]]            += $Count * $pricelist[$shipID]['cost'][901] * (1 - (Config::get('trade_charge') / 100));
+            $PLANET[$resource[902]]            += $Count * $pricelist[$shipID]['cost'][902] * (1 - (Config::get('trade_charge') / 100));
+            $PLANET[$resource[903]]            += $Count * $pricelist[$shipID]['cost'][903] * (1 - (Config::get('trade_charge') / 100));
+            $USER[$resource[921]]            += $Count * $pricelist[$shipID]['cost'][921] * (1 - (Config::get('trade_charge') / 100));
+            
+            $PLANET[$resource[$shipID]]        -= $Count;
+            
+            $GLOBALS['DATABASE']->query("UPDATE ".PLANETS." SET ".$resource[$shipID]." = ".$resource[$shipID]." - ".$Count." WHERE id = ".$PLANET['id'].";");
+            $this->printMessage($LNG['tr_exchange_done'], array("game.php?page=fleettrader", 3));
+        } else {
+            $this->printMessage($LNG['tr_exchange_error'], array("game.php?page=fleettrader", 3));
+        }
+    }
+    
+    public function show()
+    {
+        global $PLANET, $LNG, $CONF, $pricelist, $resource, $reslist;
+        
+        $Cost        = array();
+        
+        $allowedShipIDs    = explode(',', Config::get('trade_allowed_ships'));
+        
+        foreach ($allowedShipIDs as $shipID) {
+            if (in_array($shipID, $reslist['fleet']) || in_array($shipID, $reslist['defense'])) {
+                $Cost[$shipID]    = array($PLANET[$resource[$shipID]], $LNG['tech'][$shipID], $pricelist[$shipID]['cost']);
+            }
+        }
+        
+        if (empty($Cost)) {
+            $this->printMessage($LNG['ft_empty']);
+        }
 
-		$this->tplObj->loadscript('fleettrader.js');
-		$this->tplObj->execscript('updateVars();');
-		$this->tplObj->assign_vars(array(
-			'shipIDs'	=> $allowedShipIDs,
-			'CostInfos'	=> $Cost,
-			'Charge'	=> Config::get('trade_charge'),
-		));
-		
-		$this->display('page.fleetDealer.default.tpl');
-	}
+        $this->tplObj->loadscript('fleettrader.js');
+        $this->tplObj->execscript('updateVars();');
+        $this->tplObj->assign_vars(array(
+            'shipIDs'    => $allowedShipIDs,
+            'CostInfos'    => $Cost,
+            'Charge'    => Config::get('trade_charge'),
+        ));
+        
+        $this->display('page.fleetDealer.default.tpl');
+    }
 }

@@ -28,65 +28,71 @@
 
 include('includes/classes/cache/ressource/CacheFile.class.php');
 
-class Cache {
-	private $cacheRessource;
-	private $cacheBuilder = array();
-	private $cacheObj = array();
-	
-	function __construct() {
-		$this->cacheRessource = new CacheFile();
-	}
-	
-	function add($Key, $ClassName) {
-		$this->cacheBuilder[$Key]	= $ClassName;
-	}
-	
-	function get($Key, $rebuild = true) {
-		if(!isset($this->cacheObj[$Key]) && !$this->load($Key))
-		{
-			if($rebuild)
-			{
-				$this->buildCache($Key);
-			}
-			else
-			{
-				return array();
-			}
-		}
-		return $this->cacheObj[$Key];
-	}
-	
-	function flush($Key) {
-		if(!isset($this->cacheObj[$Key]) && !$this->load($Key))
-			$this->buildCache($Key);
-		
-		$this->cacheRessource->flush($Key);
-		return $this->buildCache($Key);
-	}
-	
-	function load($Key) {
-		$cacheData	= $this->cacheRessource->open($Key);
-		
-		if($cacheData === false)
-			return false;
-			
-		$cacheData	= unserialize($cacheData);
-		if($cacheData === false)
-			return false;
-		
-		$this->cacheObj[$Key] = $cacheData;
-		return true;
-	}
-	
-	function buildCache($Key) {
-		$className		= $this->cacheBuilder[$Key];
-		include_once('includes/classes/cache/builder/'.$className.'.class.php');
-		$cacheBuilder	= new $className();
-		$cacheData		= $cacheBuilder->buildCache();
-		$cacheData		= (array) $cacheData;
-		$this->cacheObj[$Key] = $cacheData;
-		$cacheData		= serialize($cacheData);
-		$this->cacheRessource->store($Key, $cacheData);
-		return true;
-	}
+class Cache
+{
+    private $cacheRessource;
+    private $cacheBuilder = array();
+    private $cacheObj = array();
+    
+    public function __construct()
+    {
+        $this->cacheRessource = new CacheFile();
+    }
+    
+    public function add($Key, $ClassName)
+    {
+        $this->cacheBuilder[$Key]    = $ClassName;
+    }
+    
+    public function get($Key, $rebuild = true)
+    {
+        if (!isset($this->cacheObj[$Key]) && !$this->load($Key)) {
+            if ($rebuild) {
+                $this->buildCache($Key);
+            } else {
+                return array();
+            }
+        }
+        return $this->cacheObj[$Key];
+    }
+    
+    public function flush($Key)
+    {
+        if (!isset($this->cacheObj[$Key]) && !$this->load($Key)) {
+            $this->buildCache($Key);
+        }
+        
+        $this->cacheRessource->flush($Key);
+        return $this->buildCache($Key);
+    }
+    
+    public function load($Key)
+    {
+        $cacheData    = $this->cacheRessource->open($Key);
+        
+        if ($cacheData === false) {
+            return false;
+        }
+            
+        $cacheData    = unserialize($cacheData);
+        if ($cacheData === false) {
+            return false;
+        }
+        
+        $this->cacheObj[$Key] = $cacheData;
+        return true;
+    }
+    
+    public function buildCache($Key)
+    {
+        $className        = $this->cacheBuilder[$Key];
+        include_once('includes/classes/cache/builder/'.$className.'.class.php');
+        $cacheBuilder    = new $className();
+        $cacheData        = $cacheBuilder->buildCache();
+        $cacheData        = (array) $cacheData;
+        $this->cacheObj[$Key] = $cacheData;
+        $cacheData        = serialize($cacheData);
+        $this->cacheRessource->store($Key, $cacheData);
+        return true;
+    }
 }

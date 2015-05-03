@@ -30,68 +30,66 @@
  */
 
 class Mail
-{	
-	static public function send($mailTarget, $mailTargetName, $mailSubject, $mailContent)
-	{		
-		$mail	= self::getMailObject();
-		
-		$mailFromAdress	= Config::get('smtp_sendmail');
-		$mailFromName	= Config::get('game_name');
-			 
-        $mail->CharSet          = 'UTF-8';              
+{
+    public static function send($mailTarget, $mailTargetName, $mailSubject, $mailContent)
+    {
+        $mail    = self::getMailObject();
+        
+        $mailFromAdress    = Config::get('smtp_sendmail');
+        $mailFromName    = Config::get('game_name');
+             
+        $mail->CharSet          = 'UTF-8';
         $mail->Subject          = $mailSubject;
         $mail->Body             = $mailContent;
         $mail->SetFrom($mailFromAdress, $mailFromName);
         $mail->AddAddress($mailTarget, $mailTargetName);
-        $mail->Send(); 
-	}
+        $mail->Send();
+    }
 
-	static public function multiSend($mailTargets, $mailSubject, $mailContent = NULL)
-	{
-		$mail	= self::getMailObject();
-		
-		$mailFromAdress	= Config::get('smtp_sendmail');
-		$mailFromName	= Config::get('game_name');
-			 
-        $mail->CharSet          = 'UTF-8';         
-        $mail->SetFrom($mailFromAdress, $mailFromName);     
+    public static function multiSend($mailTargets, $mailSubject, $mailContent = NULL)
+    {
+        $mail    = self::getMailObject();
+        
+        $mailFromAdress    = Config::get('smtp_sendmail');
+        $mailFromName    = Config::get('game_name');
+             
+        $mail->CharSet          = 'UTF-8';
+        $mail->SetFrom($mailFromAdress, $mailFromName);
         $mail->Subject          = $mailSubject;
-			 
-		foreach($mailTargets as $address => $data)
-		{
-			$content = isset($data['body']) ? $data['body'] : $mailContent;
-			
-			$mail->AddAddress($address, $data['username']);
-			$mail->MsgHTML($content);
-			$mail->Send(); 
-			$mail->ClearAddresses();
-		}
-	}
+             
+        foreach ($mailTargets as $address => $data) {
+            $content = isset($data['body']) ? $data['body'] : $mailContent;
+            
+            $mail->AddAddress($address, $data['username']);
+            $mail->MsgHTML($content);
+            $mail->Send();
+            $mail->ClearAddresses();
+        }
+    }
 
-	static private function getMailObject()
-	{
+    private static function getMailObject()
+    {
         require 'includes/libs/phpmailer/class.phpmailer.php';
         $mail                   = new PHPMailer(true);
-		$mail->PluginDir		= 'includes/libs/phpmailer/';
-		
-        if(Config::get('mail_use') == 2) {
-			$mail->IsSMTP();  
-			$mail->SMTPSecure       = Config::get('smtp_ssl');                                            
-			$mail->Host             = Config::get('smtp_host');
-			$mail->Port             = Config::get('smtp_port');
-			
-			if(Config::get('smtp_user') != '')
-			{
-				$mail->SMTPAuth         = true; 
-				$mail->Username         = Config::get('smtp_user');
-				$mail->Password         = Config::get('smtp_pass');
-			}
-        } elseif(Config::get('mail_use') == 0) {
-			$mail->IsMail();
+        $mail->PluginDir        = 'includes/libs/phpmailer/';
+        
+        if (Config::get('mail_use') == 2) {
+            $mail->IsSMTP();
+            $mail->SMTPSecure       = Config::get('smtp_ssl');
+            $mail->Host             = Config::get('smtp_host');
+            $mail->Port             = Config::get('smtp_port');
+            
+            if (Config::get('smtp_user') != '') {
+                $mail->SMTPAuth         = true;
+                $mail->Username         = Config::get('smtp_user');
+                $mail->Password         = Config::get('smtp_pass');
+            }
+        } elseif (Config::get('mail_use') == 0) {
+            $mail->IsMail();
         } else {
-			throw new Exception("Sendmail is deprecated, use SMTP instaed!");
-		}
-		
-		return $mail;
-	}
+            throw new Exception("Sendmail is deprecated, use SMTP instaed!");
+        }
+        
+        return $mail;
+    }
 }

@@ -31,54 +31,47 @@
 
 class ArrayUtil
 {
-	function combineArrayWithSingleElement($keys, $var) {
-		if(empty($keys))
-		{
-			return array();
-		}
-		return array_combine($keys, array_fill(0, count($keys), $var));
-	}
-	
-	function combineArrayWithKeyElements($keys, $var) {
-		$temp	= array();
-		foreach($keys as $key)
-		{
-			if(isset($var[$key]))
-			{
-				$temp[$key]	= $var[$key];
-			}
-			else
-			{
-				$temp[$key]	= $key;
-			}
-		}
-		
-		return $temp;
-	}
-	
-	// http://www.php.net/manual/en/function.array-key-exists.php#81659
-	function arrayKeyExistsRecrusive($needle, $haystack)
-	{
-		$result = array_key_exists($needle, $haystack);
-		
-		if ($result)
-		{
-			return $result;
-		}
-		
-		foreach ($haystack as $v)
-		{
-			if (is_array($v))
-			{
-				$result = self::arrayKeyExistsRecrusive($needle, $v);
-			}
-			
-			if ($result)
-			{
-				return $result;
-			}
-		}
-		
-		return $result;
-	}
+    public function combineArrayWithSingleElement($keys, $var)
+    {
+        if (empty($keys)) {
+            return array();
+        }
+        return array_combine($keys, array_fill(0, count($keys), $var));
+    }
+    
+    public function combineArrayWithKeyElements($keys, $var)
+    {
+        $temp    = array();
+        foreach ($keys as $key) {
+            if (isset($var[$key])) {
+                $temp[$key]    = $var[$key];
+            } else {
+                $temp[$key]    = $key;
+            }
+        }
+        
+        return $temp;
+    }
+    
+    // http://www.php.net/manual/en/function.array-key-exists.php#81659
+    public function arrayKeyExistsRecrusive($needle, $haystack)
+    {
+        $result = array_key_exists($needle, $haystack);
+        
+        if ($result) {
+            return $result;
+        }
+        
+        foreach ($haystack as $v) {
+            if (is_array($v)) {
+                $result = self::arrayKeyExistsRecrusive($needle, $v);
+            }
+            
+            if ($result) {
+                return $result;
+            }
+        }
+        
+        return $result;
+    }
 }

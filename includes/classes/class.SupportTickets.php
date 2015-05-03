@@ -27,44 +27,44 @@
  */
  
 class SupportTickets
-{	
-	function __construct()
-	{	
-		
-	}
-	
-	function createTicket($ownerID, $categoryID, $subject) {
-		global $UNI;
-		
-		$GLOBALS['DATABASE']->query("INSERT INTO ".TICKETS." SET ownerID = ".$ownerID.", universe = ".$UNI.", categoryID = ".$categoryID.", subject = '".$GLOBALS['DATABASE']->sql_escape($subject)."', time = ".TIMESTAMP.";");
-		
-		return $GLOBALS['DATABASE']->GetInsertID();
-	}
-	
-	function createAnswer($ticketID, $ownerID, $ownerName, $subject, $message, $status) {
-				
-		$GLOBALS['DATABASE']->query("INSERT INTO ".TICKETS_ANSWER." SET ticketID = ".$ticketID.",
-		ownerID = ".$ownerID.", 
-		ownerName = '".$GLOBALS['DATABASE']->sql_escape($ownerName)."', 
-		subject = '".$GLOBALS['DATABASE']->sql_escape($subject)."', 
-		message = '".$GLOBALS['DATABASE']->sql_escape($message)."', 
+{
+    public function __construct()
+    {
+    }
+    
+    public function createTicket($ownerID, $categoryID, $subject)
+    {
+        global $UNI;
+        
+        $GLOBALS['DATABASE']->query("INSERT INTO ".TICKETS." SET ownerID = ".$ownerID.", universe = ".$UNI.", categoryID = ".$categoryID.", subject = '".$GLOBALS['DATABASE']->sql_escape($subject)."', time = ".TIMESTAMP.";");
+        
+        return $GLOBALS['DATABASE']->GetInsertID();
+    }
+    
+    public function createAnswer($ticketID, $ownerID, $ownerName, $subject, $message, $status)
+    {
+        $GLOBALS['DATABASE']->query("INSERT INTO ".TICKETS_ANSWER." SET ticketID = ".$ticketID.",
+		ownerID = ".$ownerID.",
+		ownerName = '".$GLOBALS['DATABASE']->sql_escape($ownerName)."',
+		subject = '".$GLOBALS['DATABASE']->sql_escape($subject)."',
+		message = '".$GLOBALS['DATABASE']->sql_escape($message)."',
 		time = ".TIMESTAMP.";");
-		$GLOBALS['DATABASE']->query("UPDATE ".TICKETS." SET status = ".$status." WHERE ticketID = ".$ticketID.";");
-		
-		return $GLOBALS['DATABASE']->GetInsertID();
-	}
-	
-	function getCategoryList() {
-				
-		$categoryResult		= $GLOBALS['DATABASE']->query("SELECT * FROM ".TICKETS_CATEGORY.";");
-		$categoryList		= array();
-		
-		while($categoryRow = $GLOBALS['DATABASE']->fetch_array($categoryResult)) {
-			$categoryList[$categoryRow['categoryID']]	= $categoryRow['name'];
-		}
-		
-		$GLOBALS['DATABASE']->free_result($categoryResult);
-		
-		return $categoryList;
-	}
+        $GLOBALS['DATABASE']->query("UPDATE ".TICKETS." SET status = ".$status." WHERE ticketID = ".$ticketID.";");
+        
+        return $GLOBALS['DATABASE']->GetInsertID();
+    }
+    
+    public function getCategoryList()
+    {
+        $categoryResult        = $GLOBALS['DATABASE']->query("SELECT * FROM ".TICKETS_CATEGORY.";");
+        $categoryList        = array();
+        
+        while ($categoryRow = $GLOBALS['DATABASE']->fetch_array($categoryResult)) {
+            $categoryList[$categoryRow['categoryID']]    = $categoryRow['name'];
+        }
+        
+        $GLOBALS['DATABASE']->free_result($categoryResult);
+        
+        return $categoryList;
+    }
 }

@@ -29,40 +29,41 @@
 
 class DailyCronJob
 {
-	function run()
-	{
-		$this->optimizeTables();
-		$this->clearCache();
-		$this->reCalculateCronjobs();
-		$this->clearEcoCache();
-	}
-	
-	function optimizeTables()
-	{
-		$tables	= $GLOBALS['DATABASE']->query("SHOW TABLE STATUS FROM ".DB_NAME.";");
-		$SQL 	= array();
-		while($table = $GLOBALS['DATABASE']->fetch_array($tables)){
-			$prefix = explode("_", $table['Name']);  
-			
-			if($prefix[0].'_' === DB_PREFIX && $prefix[1] !== 'session')
-				$SQL[]	= $table['Name'];
-		}
+    public function run()
+    {
+        $this->optimizeTables();
+        $this->clearCache();
+        $this->reCalculateCronjobs();
+        $this->clearEcoCache();
+    }
+    
+    public function optimizeTables()
+    {
+        $tables    = $GLOBALS['DATABASE']->query("SHOW TABLE STATUS FROM ".DB_NAME.";");
+        $SQL    = array();
+        while ($table = $GLOBALS['DATABASE']->fetch_array($tables)) {
+            $prefix = explode("_", $table['Name']);
+            
+            if ($prefix[0].'_' === DB_PREFIX && $prefix[1] !== 'session') {
+                $SQL[]    = $table['Name'];
+            }
+        }
 
-		$GLOBALS['DATABASE']->query("OPTIMIZE TABLE ".implode(', ',$SQL).";");
-	}
-	
-	function clearCache()
-	{
-		ClearCache();
-	}
-	
-	function reCalculateCronjobs()
-	{
-		Cronjob::reCalculateCronjobs();
-	}
-	
-	function clearEcoCache()
-	{
-		$GLOBALS['DATABASE']->query("UPDATE ".PLANETS." SET eco_hash = '';");
-	}
+        $GLOBALS['DATABASE']->query("OPTIMIZE TABLE ".implode(', ',$SQL).";");
+    }
+    
+    public function clearCache()
+    {
+        ClearCache();
+    }
+    
+    public function reCalculateCronjobs()
+    {
+        Cronjob::reCalculateCronjobs();
+    }
+    
+    public function clearEcoCache()
+    {
+        $GLOBALS['DATABASE']->query("UPDATE ".PLANETS." SET eco_hash = '';");
+    }
 }

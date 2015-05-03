@@ -26,46 +26,44 @@
  * @link http://2moons.cc/
  */
 
-class Language implements ArrayAccess {
+class Language implements ArrayAccess
+{
     private $container = array();
     private $language = array();
-    static private $allLangauges = array();
-	
-	static function getAllowedLangs($OnlyKey = true)
-	{
-		if(count(self::$allLangauges) == 0) {
-			$GLOBALS['CACHE']->add('language', 'LanguageBuildCache');
-			self::$allLangauges = $GLOBALS['CACHE']->get('language');
-		}
-		
-		if($OnlyKey) {
-			return array_keys(self::$allLangauges);
-		}
-		else {
-			return self::$allLangauges;
-		}
-	}
-	
-	public function getUserAgentLanguage()
-	{
-   		if (isset($_REQUEST['lang']) && in_array($_REQUEST['lang'], self::getAllowedLangs()))
-		{
-			HTTP::sendCookie('lang', $_REQUEST['lang'], 2147483647);
-			$this->setLanguage($_REQUEST['lang']);
-			return true;
-		}
-		
-   		if ((MODE === 'LOGIN' || MODE === 'INSTALL') && isset($_COOKIE['lang']) && in_array($_COOKIE['lang'], self::getAllowedLangs()))
-		{
-			$this->setLanguage($_COOKIE['lang']);
-			return true;
-		}
-		
-	    if (empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+    private static $allLangauges = array();
+    
+    public static function getAllowedLangs($OnlyKey = true)
+    {
+        if (count(self::$allLangauges) == 0) {
+            $GLOBALS['CACHE']->add('language', 'LanguageBuildCache');
+            self::$allLangauges = $GLOBALS['CACHE']->get('language');
+        }
+        
+        if ($OnlyKey) {
+            return array_keys(self::$allLangauges);
+        } else {
+            return self::$allLangauges;
+        }
+    }
+    
+    public function getUserAgentLanguage()
+    {
+        if (isset($_REQUEST['lang']) && in_array($_REQUEST['lang'], self::getAllowedLangs())) {
+            HTTP::sendCookie('lang', $_REQUEST['lang'], 2147483647);
+            $this->setLanguage($_REQUEST['lang']);
+            return true;
+        }
+        
+        if ((MODE === 'LOGIN' || MODE === 'INSTALL') && isset($_COOKIE['lang']) && in_array($_COOKIE['lang'], self::getAllowedLangs())) {
+            $this->setLanguage($_COOKIE['lang']);
+            return true;
+        }
+        
+        if (empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
             return false;
         }
-		
-		$quality = 0;
+        
+        $quality = 0;
 
 
         $accepted_languages = preg_split('/,\s*/', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
@@ -73,114 +71,106 @@ class Language implements ArrayAccess {
         $language = $this->getLanguage();
         $current_q = 0;
 
-        foreach ($accepted_languages as $accepted_language)
-		{
-			$isValid = preg_match('/^([a-z]{1,8}(?:-[a-z]{1,8})*)'.'(?:;\s*q=(0(?:\.[0-9]{1,3})?|1(?:\.0{1,3})?))?$/i', $accepted_language, $matches);
+        foreach ($accepted_languages as $accepted_language) {
+            $isValid = preg_match('/^([a-z]{1,8}(?:-[a-z]{1,8})*)'.'(?:;\s*q=(0(?:\.[0-9]{1,3})?|1(?:\.0{1,3})?))?$/i', $accepted_language, $matches);
 
-			if ($isValid !== 1)
-			{
-				continue;
-			}
+            if ($isValid !== 1) {
+                continue;
+            }
 
-            list($code)	= explode('-', strtolower($matches[1]));
-			$quality	= isset($matches[2]) ? (float)$matches[2] : 1.0;
+            list($code)    = explode('-', strtolower($matches[1]));
+            $quality    = isset($matches[2]) ? (float)$matches[2] : 1.0;
 
-			if($quality > $current_q && in_array($code, self::getAllowedLangs()))
-			{
-				$language	= $code;
-				$current_q	= $quality;
-				break;
-			}
+            if ($quality > $current_q && in_array($code, self::getAllowedLangs())) {
+                $language    = $code;
+                $current_q    = $quality;
+                break;
+            }
         }
-		
-		HTTP::sendCookie('lang', $language, 2147483647);
-		$this->setLanguage($language);
-	}
-	
+        
+        HTTP::sendCookie('lang', $language, 2147483647);
+        $this->setLanguage($language);
+    }
+    
     public function __construct($language = NULL)
-	{
-		$this->setLanguage($language);
+    {
+        $this->setLanguage($language);
     }
-	
+    
     public function setLanguage($language)
-	{
-		if(!is_null($language) && in_array($language, self::getAllowedLangs()))
-		{
-			$this->language = $language;
-		}
-		elseif(MODE !== 'INSTALL')
-		{
-			$this->language	= Config::get('lang');
-		}
-		else
-		{
-			$this->language	= DEFAULT_LANG;
-		}
+    {
+        if (!is_null($language) && in_array($language, self::getAllowedLangs())) {
+            $this->language = $language;
+        } elseif (MODE !== 'INSTALL') {
+            $this->language    = Config::get('lang');
+        } else {
+            $this->language    = DEFAULT_LANG;
+        }
     }
-	
-    public function addData($data) {
-		$this->container = array_replace_recursive($this->container, $data);
+    
+    public function addData($data)
+    {
+        $this->container = array_replace_recursive($this->container, $data);
     }
-	
-	public function getLanguage()
-	{
-		return $this->language;
-	}
-	
-	public function getTemplate($templateName)
-	{
-		if(file_exists(ROOT_PATH.'language/'.$this->getLanguage().'/templates/'.$templateName.'.txt'))
-		{
-			return file_get_contents(ROOT_PATH.'language/'.$this->getLanguage().'/templates/'.$templateName.'.txt');
-		}
-		else
-		{
-			return '### Template "'.$templateName.'" on language "'.$this->getLanguage().'" not found! ###';
-		}
-	}
-	
-	public function includeData($Files)
-	{
-		// Fixed BOM problems.
-		ob_start();
-		
-        foreach($Files as $File) {
-			require('language/'.$this->getLanguage().'/'.$File.'.php');
-		}
-		
-		if(file_exists('language/'.$this->getLanguage().'/CUSTOM.php'))
-		{
-			require('language/'.$this->getLanguage().'/CUSTOM.php');
-		}
-		
-		ob_end_clean();
-		$this->addData($LNG);
-	}
-	
-	public function insertData($Files)
-	{
-		
-	}
-	
-	/** ArrayAccess Functions **/
-	
-    public function offsetSet($offset, $value) {
+    
+    public function getLanguage()
+    {
+        return $this->language;
+    }
+    
+    public function getTemplate($templateName)
+    {
+        if (file_exists(ROOT_PATH.'language/'.$this->getLanguage().'/templates/'.$templateName.'.txt')) {
+            return file_get_contents(ROOT_PATH.'language/'.$this->getLanguage().'/templates/'.$templateName.'.txt');
+        } else {
+            return '### Template "'.$templateName.'" on language "'.$this->getLanguage().'" not found! ###';
+        }
+    }
+    
+    public function includeData($Files)
+    {
+        // Fixed BOM problems.
+        ob_start();
+        
+        foreach ($Files as $File) {
+            require('language/'.$this->getLanguage().'/'.$File.'.php');
+        }
+        
+        if (file_exists('language/'.$this->getLanguage().'/CUSTOM.php')) {
+            require('language/'.$this->getLanguage().'/CUSTOM.php');
+        }
+        
+        ob_end_clean();
+        $this->addData($LNG);
+    }
+    
+    public function insertData($Files)
+    {
+    }
+    
+    /** ArrayAccess Functions **/
+    
+    public function offsetSet($offset, $value)
+    {
         if (is_null($offset)) {
             $this->container[] = $value;
         } else {
             $this->container[$offset] = $value;
         }
     }
-	
-    public function offsetExists($offset) {
+    
+    public function offsetExists($offset)
+    {
         return isset($this->container[$offset]);
     }
-	
-    public function offsetUnset($offset) {
+    
+    public function offsetUnset($offset)
+    {
         unset($this->container[$offset]);
     }
-	
-    public function offsetGet($offset) {
+    
+    public function offsetGet($offset)
+    {
         return isset($this->container[$offset]) ? $this->container[$offset] : $offset;
     }
 }

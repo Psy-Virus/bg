@@ -19,7 +19,7 @@
 
 function smarty_modifiercompiler_json($params, $compiler)
 {
-	return 'json_encode(' . $params[0] . ')';
+    return 'json_encode(' . $params[0] . ')';
 }
 
 ?>

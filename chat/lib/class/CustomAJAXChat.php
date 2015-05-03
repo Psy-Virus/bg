@@ -26,99 +26,104 @@
  * @link http://2moons.cc/
  */
 
-class CustomAJAXChat extends AJAXChat {
+class CustomAJAXChat extends AJAXChat
+{
 
-	function initCustomConfig() {
-		$this->setConfig('dbConnection', 'link', $GLOBALS['DATABASE']);
-		$this->setConfig('chatBotName', false, Config::get('chat_botname'));
-		$this->setConfig('allowUserMessageDelete', false, (bool) Config::get('chat_allowdelmes'));
-		$this->setConfig('allowNickChange', false, (bool) Config::get('chat_nickchange'));
-		$this->setConfig('chatClosed', false, (bool) Config::get('chat_closed'));
-		$this->setConfig('allowPrivateChannels', false, (bool) Config::get('chat_allowchan'));
-		$this->setConfig('allowPrivateMessages', false, (bool) Config::get('chat_allowmes'));
-		$this->setConfig('defaultChannelName', false, Config::get('chat_channelname'));
-		$this->setConfig('showChannelMessages', false, (bool) Config::get('chat_logmessage'));
-		$this->setConfig('langAvailable', false, Language::getAllowedLangs());
-		$this->setConfig('langNames', false, Language::getAllowedLangs(false));
-		$this->setConfig('forceAutoLogin', false, true);
-		$this->setConfig('contentType', false, 'text/html');
-	}
-	
-	function initCustomSession() {
-		if(!$this->getRequestVar('ajax'))
-		{
-			$this->getAllChannels();
-			if(!is_null($this->getChannel()))
-			{
-				$this->switchChannel($this->getConfig('defaultChannelName'));
-			}
-		}
-	}
-	
-	function initCustomRequestVars() {
-		$this->setRequestVar('action', isset($_REQUEST['action']) ? $_REQUEST['action'] : '');
-	}
+    public function initCustomConfig()
+    {
+        $this->setConfig('dbConnection', 'link', $GLOBALS['DATABASE']);
+        $this->setConfig('chatBotName', false, Config::get('chat_botname'));
+        $this->setConfig('allowUserMessageDelete', false, (bool) Config::get('chat_allowdelmes'));
+        $this->setConfig('allowNickChange', false, (bool) Config::get('chat_nickchange'));
+        $this->setConfig('chatClosed', false, (bool) Config::get('chat_closed'));
+        $this->setConfig('allowPrivateChannels', false, (bool) Config::get('chat_allowchan'));
+        $this->setConfig('allowPrivateMessages', false, (bool) Config::get('chat_allowmes'));
+        $this->setConfig('defaultChannelName', false, Config::get('chat_channelname'));
+        $this->setConfig('showChannelMessages', false, (bool) Config::get('chat_logmessage'));
+        $this->setConfig('langAvailable', false, Language::getAllowedLangs());
+        $this->setConfig('langNames', false, Language::getAllowedLangs(false));
+        $this->setConfig('forceAutoLogin', false, true);
+        $this->setConfig('contentType', false, 'text/html');
+    }
+    
+    public function initCustomSession()
+    {
+        if (!$this->getRequestVar('ajax')) {
+            $this->getAllChannels();
+            if (!is_null($this->getChannel())) {
+                $this->switchChannel($this->getConfig('defaultChannelName'));
+            }
+        }
+    }
+    
+    public function initCustomRequestVars()
+    {
+        $this->setRequestVar('action', isset($_REQUEST['action']) ? $_REQUEST['action'] : '');
+    }
 
-	function revalidateUserID() {
-		if($this->getUserID() === $_SESSION['id']) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	function getValidLoginUserData() {
-		global $auth, $user;
-		
-		// Return false if given user is a bot:
-		if(!isset($_SESSION)) {
-			return false;
-		}
-		
-		$sqlData = $this->db->sqlQuery("SELECT authlevel, username, ally_id FROM ".USERS." WHERE id = ".$_SESSION['id']." AND id NOT IN (SELECT userid FROM ".ALLIANCE_REQUEST.");")->fetch();
-		
-		$userData = array();
-		$userData['userID'] = $_SESSION['id'];
+    public function revalidateUserID()
+    {
+        if ($this->getUserID() === $_SESSION['id']) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public function getValidLoginUserData()
+    {
+        global $auth, $user;
+        
+        // Return false if given user is a bot:
+        if (!isset($_SESSION)) {
+            return false;
+        }
+        
+        $sqlData = $this->db->sqlQuery("SELECT authlevel, username, ally_id FROM ".USERS." WHERE id = ".$_SESSION['id']." AND id NOT IN (SELECT userid FROM ".ALLIANCE_REQUEST.");")->fetch();
+        
+        $userData = array();
+        $userData['userID'] = $_SESSION['id'];
 
-		$userData['userName'] = $this->trimUserName($sqlData['username']);
-		$userData['userAlly'] = $sqlData['ally_id'];
-		
-		if($sqlData['authlevel'] == AUTH_ADM)
-			$userData['userRole'] = AJAX_CHAT_ADMIN;
-		elseif($sqlData['authlevel'] > AUTH_USR)
-			$userData['userRole'] = AJAX_CHAT_MODERATOR;
-		else
-			$userData['userRole'] = AJAX_CHAT_USER;
-		
-		return $userData;
-	}
+        $userData['userName'] = $this->trimUserName($sqlData['username']);
+        $userData['userAlly'] = $sqlData['ally_id'];
+        
+        if ($sqlData['authlevel'] == AUTH_ADM) {
+            $userData['userRole'] = AJAX_CHAT_ADMIN;
+        } elseif ($sqlData['authlevel'] > AUTH_USR) {
+            $userData['userRole'] = AJAX_CHAT_MODERATOR;
+        } else {
+            $userData['userRole'] = AJAX_CHAT_USER;
+        }
+        
+        return $userData;
+    }
 
-	// Store all existing channels
-	// Make sure channel names don't contain any whitespace
-	function getAllChannels() {
-		if($this->_allChannels === null) {
-			$this->_allChannels = array(
-				$this->trimChannelName($this->getConfig('defaultChannelName')) => $this->getConfig('defaultChannelID')
-			);
-			
-			$userAlly = $this->db->sqlQuery("SELECT ally_id as id FROM ".USERS." WHERE id = ".$_SESSION['id'].";")->fetch();
-			$result = $this->db->sqlQuery("SELECT id, ally_name FROM ".ALLIANCE." WHERE id = ".$userAlly['id'].";");
+    // Store all existing channels
+    // Make sure channel names don't contain any whitespace
+    public function getAllChannels()
+    {
+        if ($this->_allChannels === null) {
+            $this->_allChannels = array(
+                $this->trimChannelName($this->getConfig('defaultChannelName')) => $this->getConfig('defaultChannelID')
+            );
+            
+            $userAlly = $this->db->sqlQuery("SELECT ally_id as id FROM ".USERS." WHERE id = ".$_SESSION['id'].";")->fetch();
+            $result = $this->db->sqlQuery("SELECT id, ally_name FROM ".ALLIANCE." WHERE id = ".$userAlly['id'].";");
 
-			$defaultChannelFound = false;
+            $defaultChannelFound = false;
 
-			while($row = $result->fetch()) {
-				$row['id'] = $row['id'] + 100;
-				$this->_allChannels[$this->trimChannelName('+'.$row['ally_name'])] = $row['id'];
-				if(!$defaultChannelFound && $this->getRequestVar('action') == 'alliance' && ($userAlly['id'] + 100) == $row['id'])
-				{
-					$this->setConfig('defaultChannelName', false, $this->trimChannelName('+'.$row['ally_name']));
-					$this->setConfig('defaultChannelID', false, $row['id']);
-					$defaultChannelFound = true;
-				}
-			}
-		}
-		
-		return $this->_allChannels;
-	}
+            while ($row = $result->fetch()) {
+                $row['id'] = $row['id'] + 100;
+                $this->_allChannels[$this->trimChannelName('+'.$row['ally_name'])] = $row['id'];
+                if (!$defaultChannelFound && $this->getRequestVar('action') == 'alliance' && ($userAlly['id'] + 100) == $row['id']) {
+                    $this->setConfig('defaultChannelName', false, $this->trimChannelName('+'.$row['ally_name']));
+                    $this->setConfig('defaultChannelID', false, $row['id']);
+                    $defaultChannelFound = true;
+                }
+            }
+        }
+        
+        return $this->_allChannels;
+    }
 }
 ?>

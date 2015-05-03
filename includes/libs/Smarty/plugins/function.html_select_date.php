@@ -1,7 +1,7 @@
 <?php
 /**
  * Smarty plugin
- * 
+ *
  * @package Smarty
  * @subpackage PluginsFunction
  */
@@ -17,11 +17,11 @@ require_once(SMARTY_PLUGINS_DIR . 'shared.make_timestamp.php');
 
 /**
  * Smarty {html_select_date} plugin
- * 
+ *
  * Type:     function<br>
  * Name:     html_select_date<br>
  * Purpose:  Prints the dropdowns for date selection.
- * 
+ *
  * ChangeLog:
  * <pre>
  *            - 1.0 initial release
@@ -37,19 +37,19 @@ require_once(SMARTY_PLUGINS_DIR . 'shared.make_timestamp.php');
  *              dropdown to include given date unless explicitly set (Monte)
  *            - 1.3.4 fix behaviour of 0000-00-00 00:00:00 dates to match that
  *              of 0000-00-00 dates (cybot, boots)
- *            - 2.0 complete rewrite for performance,  
+ *            - 2.0 complete rewrite for performance,
  *              added attributes month_names, *_id
  * </pre>
- * 
+ *
  * @link http://www.smarty.net/manual/en/language.function.html.select.date.php {html_select_date}
  *      (Smarty online manual)
  * @version 2.0
- * @author Andrei Zmievski 
- * @author Monte Ohrt <monte at ohrt dot com> 
+ * @author Andrei Zmievski
+ * @author Monte Ohrt <monte at ohrt dot com>
  * @author Rodney Rehm
  * @param array                    $params   parameters
  * @param Smarty_Internal_Template $template template object
- * @return string 
+ * @return string
  */
 function smarty_function_html_select_date($params, $template)
 {
@@ -171,9 +171,9 @@ function smarty_function_html_select_date($params, $template)
                     $extra_attrs .= ' ' . $_key . '="' . smarty_function_escape_special_chars($_value) . '"';
                 } else {
                     trigger_error("html_select_date: extra attribute '$_key' cannot be an array", E_USER_NOTICE);
-                } 
+                }
                 break;
-        } 
+        }
     }
     
     // Note: date() is faster than strftime()
@@ -218,12 +218,16 @@ function smarty_function_html_select_date($params, $template)
         $t = $$key;
         if ($t === null) {
             $$key = (int)$_current_year;
-        } else if ($t[0] == '+') {
-            $$key = (int)($_current_year + trim(substr($t, 1)));
-        } else if ($t[0] == '-') {
-            $$key = (int)($_current_year - trim(substr($t, 1)));
         } else {
-            $$key = (int)$$key;
+            if ($t[0] == '+') {
+                $$key = (int)($_current_year + trim(substr($t, 1)));
+            } else {
+                if ($t[0] == '-') {
+                    $$key = (int)($_current_year - trim(substr($t, 1)));
+                } else {
+                    $$key = (int)$$key;
+                }
+            }
         }
     }
 
@@ -241,7 +245,7 @@ function smarty_function_html_select_date($params, $template)
         $_name = $field_array ? ($field_array . '[' . $prefix . 'Year]') : ($prefix . 'Year');
         if ($all_extra) {
             $_extra .= ' ' . $all_extra;
-        } 
+        }
         if ($year_extra) {
             $_extra .= ' ' . $year_extra;
         }
@@ -251,13 +255,13 @@ function smarty_function_html_select_date($params, $template)
         } else {
             $_html_years = '<select name="' . $_name . '"';
             if ($year_id !== null || $all_id !== null) {
-                $_html_years .= ' id="' . smarty_function_escape_special_chars( 
-                    $year_id !== null ? ( $year_id ? $year_id : $_name ) : ( $all_id ? ($all_id . $_name) : $_name ) 
+                $_html_years .= ' id="' . smarty_function_escape_special_chars(
+                    $year_id !== null ? ( $year_id ? $year_id : $_name ) : ( $all_id ? ($all_id . $_name) : $_name )
                 ) . '"';
             }
             if ($year_size) {
                 $_html_years .= ' size="' . $year_size . '"';
-            } 
+            }
             $_html_years .= $_extra . $extra_attrs . '>' . $option_separator;
             
             if (isset($year_empty) || isset($all_empty)) {
@@ -282,20 +286,20 @@ function smarty_function_html_select_date($params, $template)
         $_name = $field_array ? ($field_array . '[' . $prefix . 'Month]') : ($prefix . 'Month');
         if ($all_extra) {
             $_extra .= ' ' . $all_extra;
-        } 
+        }
         if ($month_extra) {
             $_extra .= ' ' . $month_extra;
         }
         
         $_html_months = '<select name="' . $_name . '"';
         if ($month_id !== null || $all_id !== null) {
-            $_html_months .= ' id="' . smarty_function_escape_special_chars( 
-                $month_id !== null ? ( $month_id ? $month_id : $_name ) : ( $all_id ? ($all_id . $_name) : $_name ) 
+            $_html_months .= ' id="' . smarty_function_escape_special_chars(
+                $month_id !== null ? ( $month_id ? $month_id : $_name ) : ( $all_id ? ($all_id . $_name) : $_name )
             ) . '"';
         }
         if ($month_size) {
             $_html_months .= ' size="' . $month_size . '"';
-        } 
+        }
         $_html_months .= $_extra . $extra_attrs . '>' . $option_separator;
         
         if (isset($month_empty) || isset($all_empty)) {
@@ -321,20 +325,20 @@ function smarty_function_html_select_date($params, $template)
         $_name = $field_array ? ($field_array . '[' . $prefix . 'Day]') : ($prefix . 'Day');
         if ($all_extra) {
             $_extra .= ' ' . $all_extra;
-        } 
+        }
         if ($day_extra) {
             $_extra .= ' ' . $day_extra;
         }
         
         $_html_days = '<select name="' . $_name . '"';
         if ($day_id !== null || $all_id !== null) {
-            $_html_days .= ' id="' . smarty_function_escape_special_chars( 
-                $day_id !== null ? ( $day_id ? $day_id : $_name ) : ( $all_id ? ($all_id . $_name) : $_name ) 
+            $_html_days .= ' id="' . smarty_function_escape_special_chars(
+                $day_id !== null ? ( $day_id ? $day_id : $_name ) : ( $all_id ? ($all_id . $_name) : $_name )
             ) . '"';
         }
         if ($day_size) {
             $_html_days .= ' size="' . $day_size . '"';
-        } 
+        }
         $_html_days .= $_extra . $extra_attrs . '>' . $option_separator;
         
         if (isset($day_empty) || isset($all_empty)) {

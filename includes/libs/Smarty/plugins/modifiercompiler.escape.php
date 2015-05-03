@@ -46,12 +46,14 @@ function smarty_modifiercompiler_escape($params, $compiler)
                         . $params[0] .', ENT_QUOTES, '
                         . var_export($char_set, true) . ', '
                         . var_export($double_encode, true) . ')';
-                } else if ($double_encode) {
-                    return 'htmlspecialchars('
+                } else {
+                    if ($double_encode) {
+                        return 'htmlspecialchars('
                         . $params[0] .', ENT_QUOTES, '
                         . var_export($char_set, true) . ')';
-                } else {
-                    // fall back to modifier.escape.php
+                    } else {
+                        // fall back to modifier.escape.php
+                    }
                 }
 
             case 'htmlall':
@@ -64,15 +66,17 @@ function smarty_modifiercompiler_escape($params, $compiler)
                             . var_export($double_encode, true)
                             . '), "HTML-ENTITIES", '
                             . var_export($char_set, true) . ')';
-                    } else if ($double_encode) {
-                        // php <5.2.3 - only handle double encoding
+                    } else {
+                        if ($double_encode) {
+                            // php <5.2.3 - only handle double encoding
                         return 'mb_convert_encoding(htmlspecialchars('
                             . $params[0] .', ENT_QUOTES, '
                             . var_export($char_set, true)
                             . '), "HTML-ENTITIES", '
                             . var_export($char_set, true) . ')';
-                    } else {
-                        // fall back to modifier.escape.php
+                        } else {
+                            // fall back to modifier.escape.php
+                        }
                     }
                 }
 
@@ -83,13 +87,15 @@ function smarty_modifiercompiler_escape($params, $compiler)
                         . $params[0] .', ENT_QUOTES, '
                         . var_export($char_set, true) . ', '
                         . var_export($double_encode, true) . ')';
-                } else if ($double_encode) {
-                    // php <5.2.3 - only handle double encoding
+                } else {
+                    if ($double_encode) {
+                        // php <5.2.3 - only handle double encoding
                     return 'htmlentities('
                         . $params[0] .', ENT_QUOTES, '
                         . var_export($char_set, true) . ')';
-                } else {
-                    // fall back to modifier.escape.php
+                    } else {
+                        // fall back to modifier.escape.php
+                    }
                 }
 
             case 'url':
@@ -107,7 +113,7 @@ function smarty_modifiercompiler_escape($params, $compiler)
                 return 'strtr(' . $params[0] . ', array("\\\\" => "\\\\\\\\", "\'" => "\\\\\'", "\"" => "\\\\\"", "\\r" => "\\\\r", "\\n" => "\\\n", "</" => "<\/" ))';
 
         }
-    } catch(SmartyException $e) {
+    } catch (SmartyException $e) {
         // pass through to regular plugin fallback
     }
 

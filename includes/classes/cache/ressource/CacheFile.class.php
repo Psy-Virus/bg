@@ -26,22 +26,28 @@
  * @link http://2moons.cc/
  */
 
-class CacheFile {
-	function store($Key, $Value) {
-		file_put_contents(CACHE_PATH.'cache.'.$Key.'.php', $Value);
-	}
-	
-	function open($Key) {
-		if(!file_exists(CACHE_PATH.'cache.'.$Key.'.php'))
-			return false;
-			
-		return file_get_contents(CACHE_PATH.'cache.'.$Key.'.php');
-	}
-	
-	function flush($Key) {
-		if(!file_exists(CACHE_PATH.'cache.'.$Key.'.php'))
-			return false;
-		
-		unlink(CACHE_PATH.'cache.'.$Key.'.php');
-	}
+class CacheFile
+{
+    public function store($Key, $Value)
+    {
+        file_put_contents(CACHE_PATH.'cache.'.$Key.'.php', $Value);
+    }
+    
+    public function open($Key)
+    {
+        if (!file_exists(CACHE_PATH.'cache.'.$Key.'.php')) {
+            return false;
+        }
+            
+        return file_get_contents(CACHE_PATH.'cache.'.$Key.'.php');
+    }
+    
+    public function flush($Key)
+    {
+        if (!file_exists(CACHE_PATH.'cache.'.$Key.'.php')) {
+            return false;
+        }
+        
+        unlink(CACHE_PATH.'cache.'.$Key.'.php');
+    }
 }

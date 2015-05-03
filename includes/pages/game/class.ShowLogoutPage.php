@@ -29,19 +29,19 @@
 
 class ShowLogoutPage extends AbstractPage
 {
-	public static $requireModule = 0;
+    public static $requireModule = 0;
 
-	function __construct() 
-	{
-		parent::__construct();
-		$this->setWindow('popup');
-	}
-	
-	function show() 
-	{
-		global $LNG, $SESSION;
-		
-		$SESSION->DestroySession();
-		$this->display('page.logout.default.tpl');
-	}
+    public function __construct()
+    {
+        parent::__construct();
+        $this->setWindow('popup');
+    }
+    
+    public function show()
+    {
+        global $LNG, $SESSION;
+        
+        $SESSION->DestroySession();
+        $this->display('page.logout.default.tpl');
+    }
 }

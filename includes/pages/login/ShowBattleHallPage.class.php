@@ -30,16 +30,16 @@
 
 class ShowBattleHallPage extends AbstractPage
 {
-	public static $requireModule = 0;
+    public static $requireModule = 0;
 
-	function __construct() 
-	{
-		parent::__construct();
-	}
-	
-	function show() 
-	{
-		$hallRaw = $GLOBALS['DATABASE']->query("SELECT *, (
+    public function __construct()
+    {
+        parent::__construct();
+    }
+    
+    public function show()
+    {
+        $hallRaw = $GLOBALS['DATABASE']->query("SELECT *, (
 			SELECT DISTINCT
 			IF(".TOPKB_USERS.".username = '', GROUP_CONCAT(".USERS.".username SEPARATOR ' & '), GROUP_CONCAT(".TOPKB_USERS.".username SEPARATOR ' & '))
 			FROM ".TOPKB_USERS."
@@ -51,35 +51,34 @@ class ShowBattleHallPage extends AbstractPage
 			IF(".TOPKB_USERS.".username = '', GROUP_CONCAT(".USERS.".username SEPARATOR ' & '), GROUP_CONCAT(".TOPKB_USERS.".username SEPARATOR ' & '))
 			FROM ".TOPKB_USERS." INNER JOIN ".USERS." ON uid = id
 			WHERE ".TOPKB_USERS.".`rid` = ".TOPKB.".`rid` AND `role` = 2
-		) as `defender`  
+		) as `defender`
 		FROM ".TOPKB." WHERE `universe` = '".$GLOBALS['UNI']."' ORDER BY units DESC LIMIT 100;");
-		
-		$hallList	= array();
-		while($hallRow = $GLOBALS['DATABASE']->fetch_array($hallRaw)) {
-			$hallList[]	= array(
-				'result'	=> $hallRow['result'],
-				'time'		=> _date(t('php_tdformat'), $hallRow['time']),
-				'units'		=> $hallRow['units'],
-				'rid'		=> $hallRow['rid'],
-				'attacker'	=> $hallRow['attacker'],
-				'defender'	=> $hallRow['defender'],
-			);
-		}
-	
-		$GLOBALS['DATABASE']->free_result($hallRaw);
-	
-		$universeSelect	= array();		
-		$uniAllConfig	= Config::getAll('universe');
-		
-		foreach($uniAllConfig as $uniID => $uniConfig)
-		{
-			$universeSelect[$uniID]	= $uniConfig['uni_name'];
-		}
-		
-		$this->assign(array(
-			'universeSelect'	=> $universeSelect,
-			'hallList'			=> $hallList,
-		));
-		$this->render('page.battleHall.default.tpl');
-	}
+        
+        $hallList    = array();
+        while ($hallRow = $GLOBALS['DATABASE']->fetch_array($hallRaw)) {
+            $hallList[]    = array(
+                'result'    => $hallRow['result'],
+                'time'        => _date(t('php_tdformat'), $hallRow['time']),
+                'units'        => $hallRow['units'],
+                'rid'        => $hallRow['rid'],
+                'attacker'    => $hallRow['attacker'],
+                'defender'    => $hallRow['defender'],
+            );
+        }
+    
+        $GLOBALS['DATABASE']->free_result($hallRaw);
+    
+        $universeSelect    = array();
+        $uniAllConfig    = Config::getAll('universe');
+        
+        foreach ($uniAllConfig as $uniID => $uniConfig) {
+            $universeSelect[$uniID]    = $uniConfig['uni_name'];
+        }
+        
+        $this->assign(array(
+            'universeSelect'    => $universeSelect,
+            'hallList'            => $hallList,
+        ));
+        $this->render('page.battleHall.default.tpl');
+    }
 }

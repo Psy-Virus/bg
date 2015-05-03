@@ -26,120 +26,122 @@
  * @link http://2moons.cc/
  */
 
-class ShowTicketPage extends AbstractPage 
+class ShowTicketPage extends AbstractPage
 {
-	public static $requireModule = MODULE_SUPPORT;
+    public static $requireModule = MODULE_SUPPORT;
 
-	private $ticketObj;
-	
-	function __construct() 
-	{
-		parent::__construct();
-		require('includes/classes/class.SupportTickets.php');
-		$this->ticketObj	= new SupportTickets;
-	}
-	
-	public function show()
-	{
-		global $USER, $LNG;
-				
-		$ticketResult	= $GLOBALS['DATABASE']->query("SELECT t.*, COUNT(a.ticketID) as answer FROM ".TICKETS." t INNER JOIN ".TICKETS_ANSWER." a USING (ticketID) WHERE t.ownerID = ".$USER['id']." GROUP BY a.ticketID ORDER BY t.ticketID DESC;");
-		$ticketList		= array();
-		
-		while($ticketRow = $GLOBALS['DATABASE']->fetch_array($ticketResult)) {
-			$ticketRow['time']	= _date($LNG['php_tdformat'], $ticketRow['time'], $USER['timezone']);
+    private $ticketObj;
+    
+    public function __construct()
+    {
+        parent::__construct();
+        require('includes/classes/class.SupportTickets.php');
+        $this->ticketObj    = new SupportTickets;
+    }
+    
+    public function show()
+    {
+        global $USER, $LNG;
+                
+        $ticketResult    = $GLOBALS['DATABASE']->query("SELECT t.*, COUNT(a.ticketID) as answer FROM ".TICKETS." t INNER JOIN ".TICKETS_ANSWER." a USING (ticketID) WHERE t.ownerID = ".$USER['id']." GROUP BY a.ticketID ORDER BY t.ticketID DESC;");
+        $ticketList        = array();
+        
+        while ($ticketRow = $GLOBALS['DATABASE']->fetch_array($ticketResult)) {
+            $ticketRow['time']    = _date($LNG['php_tdformat'], $ticketRow['time'], $USER['timezone']);
 
-			$ticketList[$ticketRow['ticketID']]	= $ticketRow;
-		}
-		
-		$GLOBALS['DATABASE']->free_result($ticketResult);
-		
-		$this->tplObj->assign_vars(array(	
-			'ticketList'	=> $ticketList
-		));
-			
-		$this->display('page.ticket.default.tpl');
-	}
-	
-	function create() 
-	{
-		global $USER, $LNG;
-		
-		$categoryList	= $this->ticketObj->getCategoryList();
-		
-		$this->tplObj->assign_vars(array(	
-			'categoryList'	=> $categoryList,
-		));
-			
-		$this->display('page.ticket.create.tpl');		
-	}
-	
-	function send() 
-	{
-		global $USER, $UNI, $LNG;
-				
-		$ticketID	= HTTP::_GP('id', 0);
-		$categoryID	= HTTP::_GP('category', 0);
-		$message	= HTTP::_GP('message', '', true);
-		$subject	= HTTP::_GP('subject', '', true);
-		
-		if(empty($message)) {
-			if(empty($ticketID)) {
-				$this->redirectTo('game.php?page=ticket&mode=create');
-			} else {
-				$this->redirectTo('game.php?page=ticket&mode=view&id='.$ticketID);
-			}
-		}
-		
-		if(empty($ticketID)) {
-			if(empty($subject)) {
-				$this->printMessage($LNG['ti_error_no_subject']);
-			}
-			$ticketID	= $this->ticketObj->createTicket($USER['id'], $categoryID, $subject);
-		} else {
-			$ticketDetail	= $GLOBALS['DATABASE']->getFirstCell("SELECT status FROM ".TICKETS." WHERE ticketID = ".$ticketID.";");
-			if ($ticketDetail['status'] == 2)
-				$this->printMessage($LNG['ti_error_closed']);
-		}
-			
-		$this->ticketObj->createAnswer($ticketID, $USER['id'], $USER['username'], '', $message, 0);
-		$this->redirectTo('game.php?page=ticket&mode=view&id='.$ticketID);
-	}
-	
-	function view() 
-	{
-		global $USER, $LNG;
-		
-		require_once('includes/functions/BBCode.php');
-		
-		$ticketID			= HTTP::_GP('id', 0);
-		$answerResult		= $GLOBALS['DATABASE']->query("SELECT a.*, t.categoryID, t.status FROM ".TICKETS_ANSWER." a INNER JOIN ".TICKETS." t USING(ticketID) WHERE a.ticketID = ".$ticketID." ORDER BY a.answerID;");
-		$answerList			= array();
+            $ticketList[$ticketRow['ticketID']]    = $ticketRow;
+        }
+        
+        $GLOBALS['DATABASE']->free_result($ticketResult);
+        
+        $this->tplObj->assign_vars(array(
+            'ticketList'    => $ticketList
+        ));
+            
+        $this->display('page.ticket.default.tpl');
+    }
+    
+    public function create()
+    {
+        global $USER, $LNG;
+        
+        $categoryList    = $this->ticketObj->getCategoryList();
+        
+        $this->tplObj->assign_vars(array(
+            'categoryList'    => $categoryList,
+        ));
+            
+        $this->display('page.ticket.create.tpl');
+    }
+    
+    public function send()
+    {
+        global $USER, $UNI, $LNG;
+                
+        $ticketID    = HTTP::_GP('id', 0);
+        $categoryID    = HTTP::_GP('category', 0);
+        $message    = HTTP::_GP('message', '', true);
+        $subject    = HTTP::_GP('subject', '', true);
+        
+        if (empty($message)) {
+            if (empty($ticketID)) {
+                $this->redirectTo('game.php?page=ticket&mode=create');
+            } else {
+                $this->redirectTo('game.php?page=ticket&mode=view&id='.$ticketID);
+            }
+        }
+        
+        if (empty($ticketID)) {
+            if (empty($subject)) {
+                $this->printMessage($LNG['ti_error_no_subject']);
+            }
+            $ticketID    = $this->ticketObj->createTicket($USER['id'], $categoryID, $subject);
+        } else {
+            $ticketDetail    = $GLOBALS['DATABASE']->getFirstCell("SELECT status FROM ".TICKETS." WHERE ticketID = ".$ticketID.";");
+            if ($ticketDetail['status'] == 2) {
+                $this->printMessage($LNG['ti_error_closed']);
+            }
+        }
+            
+        $this->ticketObj->createAnswer($ticketID, $USER['id'], $USER['username'], '', $message, 0);
+        $this->redirectTo('game.php?page=ticket&mode=view&id='.$ticketID);
+    }
+    
+    public function view()
+    {
+        global $USER, $LNG;
+        
+        require_once('includes/functions/BBCode.php');
+        
+        $ticketID            = HTTP::_GP('id', 0);
+        $answerResult        = $GLOBALS['DATABASE']->query("SELECT a.*, t.categoryID, t.status FROM ".TICKETS_ANSWER." a INNER JOIN ".TICKETS." t USING(ticketID) WHERE a.ticketID = ".$ticketID." ORDER BY a.answerID;");
+        $answerList            = array();
 
-		if($GLOBALS['DATABASE']->numRows($answerResult) == 0) {
-			$this->printMessage(sprintf($LNG['ti_not_exist'], $ticketID));
-		}
+        if ($GLOBALS['DATABASE']->numRows($answerResult) == 0) {
+            $this->printMessage(sprintf($LNG['ti_not_exist'], $ticketID));
+        }
 
-		$ticket_status = 'Unknown';
+        $ticket_status = 'Unknown';
 
-		while($answerRow = $GLOBALS['DATABASE']->fetch_array($answerResult)) {
-			$answerRow['time']	= _date($LNG['php_tdformat'], $answerRow['time'], $USER['timezone']);
-			$answerRow['message']	= bbcode($answerRow['message']);
-			$answerList[$answerRow['answerID']]	= $answerRow;
-			if (empty($ticket_status))
-				$ticket_status = $answerRow['status'];
-		}
-		$GLOBALS['DATABASE']->free_result($answerResult);
-			
-		$categoryList	= $this->ticketObj->getCategoryList();
-		
-		$this->tplObj->assign_vars(array(
-			'ticketID'		=> $ticketID,
-			'categoryList'	=> $categoryList,
-			'answerList'	=> $answerList,
-			'status'		=> $ticket_status,
-		));
-			
-		$this->display('page.ticket.view.tpl');		
-	}
+        while ($answerRow = $GLOBALS['DATABASE']->fetch_array($answerResult)) {
+            $answerRow['time']    = _date($LNG['php_tdformat'], $answerRow['time'], $USER['timezone']);
+            $answerRow['message']    = bbcode($answerRow['message']);
+            $answerList[$answerRow['answerID']]    = $answerRow;
+            if (empty($ticket_status)) {
+                $ticket_status = $answerRow['status'];
+            }
+        }
+        $GLOBALS['DATABASE']->free_result($answerResult);
+            
+        $categoryList    = $this->ticketObj->getCategoryList();
+        
+        $this->tplObj->assign_vars(array(
+            'ticketID'        => $ticketID,
+            'categoryList'    => $categoryList,
+            'answerList'    => $answerList,
+            'status'        => $ticket_status,
+        ));
+            
+        $this->display('page.ticket.view.tpl');
+    }
 }

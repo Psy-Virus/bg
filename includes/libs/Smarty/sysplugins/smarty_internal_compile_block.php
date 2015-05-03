@@ -16,7 +16,8 @@
  * @package Smarty
  * @subpackage Compiler
  */
-class Smarty_Internal_Compile_Block extends Smarty_Internal_CompileBase {
+class Smarty_Internal_Compile_Block extends Smarty_Internal_CompileBase
+{
 
     /**
      * Attribute definition: Overwrites base class.
@@ -49,7 +50,8 @@ class Smarty_Internal_Compile_Block extends Smarty_Internal_CompileBase {
      * @param object $compiler compiler object
      * @return boolean true
      */
-    public function compile($args, $compiler) {
+    public function compile($args, $compiler)
+    {
         // check and get attributes
         $_attr = $this->getAttributes($compiler, $args);
         $save = array($_attr, $compiler->parser->current_buffer, $compiler->nocache, $compiler->smarty->merge_compiled_includes, $compiler->merged_templates, $compiler->smarty->merged_templates_func, $compiler->template->properties, $compiler->template->has_nocache_code);
@@ -75,7 +77,8 @@ class Smarty_Internal_Compile_Block extends Smarty_Internal_CompileBase {
      * @param object $template          template object
      * @param string $filepath          filepath of template source
      */
-    public static function saveBlockData($block_content, $block_tag, $template, $filepath) {
+    public static function saveBlockData($block_content, $block_tag, $template, $filepath)
+    {
         $_rdl = preg_quote($template->smarty->right_delimiter);
         $_ldl = preg_quote($template->smarty->left_delimiter);
         if (!$template->smarty->auto_literal) {
@@ -102,13 +105,13 @@ class Smarty_Internal_Compile_Block extends Smarty_Internal_CompileBase {
                             }
                             // replace {$smarty.block.child} tag
                             if (preg_match("!{$_ldl}{$al}\\\$smarty\.block\.child\s*{$_rdl}!",$_match2[7][$key])) {
-                                 $replacement =  preg_replace("!({$_ldl}{$al}\\\$smarty\.block\.child\s*{$_rdl})!", $replacement, $_match2[7][$key]);
-                                 $block_content = preg_replace("!(({$_ldl}{$al}block)(.*)?{$name}(.*)?({$_rdl}[\s\S]*?{$_ldl}{$al}/block\s*{$_rdl}))!", $replacement, $block_content);
-                           }
-                             if (preg_match("!{$_ldl}{$al}\\\$smarty\.block\.child\s*{$_rdl}!",$_match2[8][$key])) {
-                                 $replacement =  preg_replace("!{$_ldl}{$al}\\\$smarty\.block\.child\s*{$_rdl}!", $replacement, $_match2[8][$key]);
-                                 $block_content = preg_replace("!(({$_ldl}{$al}block)(.*)?{$name}(.*)?({$_rdl})(.*)?({$_ldl}{$al}/block\s*{$_rdl}))!", $replacement, $block_content);
-                             }
+                                $replacement =  preg_replace("!({$_ldl}{$al}\\\$smarty\.block\.child\s*{$_rdl})!", $replacement, $_match2[7][$key]);
+                                $block_content = preg_replace("!(({$_ldl}{$al}block)(.*)?{$name}(.*)?({$_rdl}[\s\S]*?{$_ldl}{$al}/block\s*{$_rdl}))!", $replacement, $block_content);
+                            }
+                            if (preg_match("!{$_ldl}{$al}\\\$smarty\.block\.child\s*{$_rdl}!",$_match2[8][$key])) {
+                                $replacement =  preg_replace("!{$_ldl}{$al}\\\$smarty\.block\.child\s*{$_rdl}!", $replacement, $_match2[8][$key]);
+                                $block_content = preg_replace("!(({$_ldl}{$al}block)(.*)?{$name}(.*)?({$_rdl})(.*)?({$_ldl}{$al}/block\s*{$_rdl}))!", $replacement, $block_content);
+                            }
                         } else {
                             // remove hidden blocks
                             $block_content = preg_replace("!(({$_ldl}{$al}block)(.*)?{$name}(.*)?({$_rdl}[\s\S]*?{$_ldl}{$al}/block\s*{$_rdl}))!", '', $block_content);
@@ -157,7 +160,8 @@ class Smarty_Internal_Compile_Block extends Smarty_Internal_CompileBase {
      * @param string $_name     optional name of child block
      * @return string   compiled code of schild block
      */
-    public static function compileChildBlock($compiler, $_name = null) {
+    public static function compileChildBlock($compiler, $_name = null)
+    {
         $_output = '';
         // if called by {$smarty.block.child} we must search the name of enclosing {block}
         if ($_name == null) {
@@ -223,7 +227,6 @@ class Smarty_Internal_Compile_Block extends Smarty_Internal_CompileBase {
         unset($_tpl);
         return $_output;
     }
-
 }
 
 /**
@@ -232,7 +235,8 @@ class Smarty_Internal_Compile_Block extends Smarty_Internal_CompileBase {
  * @package Smarty
  * @subpackage Compiler
  */
-class Smarty_Internal_Compile_Blockclose extends Smarty_Internal_CompileBase {
+class Smarty_Internal_Compile_Blockclose extends Smarty_Internal_CompileBase
+{
 
     /**
      * Compiles code for the {/block} tag
@@ -241,7 +245,8 @@ class Smarty_Internal_Compile_Blockclose extends Smarty_Internal_CompileBase {
      * @param object $compiler compiler object
      * @return string compiled code
      */
-    public function compile($args, $compiler) {
+    public function compile($args, $compiler)
+    {
         $compiler->has_code = true;
         // check and get attributes
         $_attr = $this->getAttributes($compiler, $args);
@@ -276,7 +281,6 @@ class Smarty_Internal_Compile_Blockclose extends Smarty_Internal_CompileBase {
         $compiler->suppressNocacheProcessing = true;
         return $_output;
     }
-
 }
 
 ?>

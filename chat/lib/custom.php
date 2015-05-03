@@ -18,12 +18,10 @@ require 'includes/pages/game/class.AbstractPage.php';
 require 'includes/pages/game/class.ShowErrorPage.php';
 require 'includes/common.php';
 
-if(!$SESSION->IsUserLogin() || (Config::get('game_disable') == 0 && $USER['authlevel'] == AUTH_USR))
-{
-	HTTP::redirectTo('index.php?code=3');
+if (!$SESSION->IsUserLogin() || (Config::get('game_disable') == 0 && $USER['authlevel'] == AUTH_USR)) {
+    HTTP::redirectTo('index.php?code=3');
 }
-	
-if(!isModulAvalible(MODULE_CHAT))
-{
-	ShowErrorPage::printError($LNG['sys_module_inactive']);
+    
+if (!isModulAvalible(MODULE_CHAT)) {
+    ShowErrorPage::printError($LNG['sys_module_inactive']);
 }

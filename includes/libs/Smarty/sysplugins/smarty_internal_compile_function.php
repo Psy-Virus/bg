@@ -15,7 +15,8 @@
  * @package Smarty
  * @subpackage Compiler
  */
-class Smarty_Internal_Compile_Function extends Smarty_Internal_CompileBase {
+class Smarty_Internal_Compile_Function extends Smarty_Internal_CompileBase
+{
 
     /**
      * Attribute definition: Overwrites base class.
@@ -88,7 +89,6 @@ class Smarty_Internal_Compile_Function extends Smarty_Internal_CompileBase {
         $compiler->template->properties['function'][$_name]['compiled'] = '';
         return true;
     }
-
 }
 
 /**
@@ -97,7 +97,8 @@ class Smarty_Internal_Compile_Function extends Smarty_Internal_CompileBase {
  * @package Smarty
  * @subpackage Compiler
  */
-class Smarty_Internal_Compile_Functionclose extends Smarty_Internal_CompileBase {
+class Smarty_Internal_Compile_Functionclose extends Smarty_Internal_CompileBase
+{
 
     /**
      * Compiles code for the {/function} tag
@@ -116,8 +117,8 @@ class Smarty_Internal_Compile_Functionclose extends Smarty_Internal_CompileBase 
         $plugins_string = '';
         if (!empty($compiler->template->required_plugins['compiled'])) {
             $plugins_string = '<?php ';
-            foreach($compiler->template->required_plugins['compiled'] as $tmp) {
-                foreach($tmp as $data) {
+            foreach ($compiler->template->required_plugins['compiled'] as $tmp) {
+                foreach ($tmp as $data) {
                     $plugins_string .= "if (!is_callable('{$data['function']}')) include '{$data['file']}';\n";
                 }
             }
@@ -125,8 +126,8 @@ class Smarty_Internal_Compile_Functionclose extends Smarty_Internal_CompileBase 
         }
         if (!empty($compiler->template->required_plugins['nocache'])) {
             $plugins_string .= "<?php echo '/*%%SmartyNocache:{$compiler->template->properties['nocache_hash']}%%*/<?php ";
-            foreach($compiler->template->required_plugins['nocache'] as $tmp) {
-                foreach($tmp as $data) {
+            foreach ($compiler->template->required_plugins['nocache'] as $tmp) {
+                foreach ($tmp as $data) {
                     $plugins_string .= "if (!is_callable(\'{$data['function']}\')) include \'{$data['file']}\';\n";
                 }
             }
@@ -134,9 +135,9 @@ class Smarty_Internal_Compile_Functionclose extends Smarty_Internal_CompileBase 
         }
          // remove last line break from function definition
          $last = count($compiler->parser->current_buffer->subtrees) - 1;
-         if ($compiler->parser->current_buffer->subtrees[$last] instanceof _smarty_linebreak) {
-             unset($compiler->parser->current_buffer->subtrees[$last]);
-         }
+        if ($compiler->parser->current_buffer->subtrees[$last] instanceof _smarty_linebreak) {
+            unset($compiler->parser->current_buffer->subtrees[$last]);
+        }
         // if caching save template function for possible nocache call
         if ($compiler->template->caching) {
             $compiler->template->properties['function'][$_name]['compiled'] .= $plugins_string
@@ -160,7 +161,6 @@ foreach (Smarty::\$global_tpl_vars as \$key => \$value) if(!isset(\$_smarty_tpl-
         $compiler->template->required_plugins = $saved_data[3];
         return $output;
     }
-
 }
 
 ?>

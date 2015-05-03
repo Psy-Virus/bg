@@ -58,8 +58,8 @@ function smarty_function_html_checkboxes($params, $template)
 
     $extra = '';
 
-    foreach($params as $_key => $_val) {
-        switch($_key) {
+    foreach ($params as $_key => $_val) {
+        switch ($_key) {
             case 'name':
             case 'separator':
                 $$_key = (string) $_val;
@@ -134,7 +134,7 @@ function smarty_function_html_checkboxes($params, $template)
                 // omit break; to fall through!
 
             default:
-                if(!is_array($_val)) {
+                if (!is_array($_val)) {
                     $extra .= ' '.$_key.'="'.smarty_function_escape_special_chars($_val).'"';
                 } else {
                     trigger_error("html_checkboxes: extra attribute '$_key' cannot be an array", E_USER_NOTICE);
@@ -143,8 +143,9 @@ function smarty_function_html_checkboxes($params, $template)
         }
     }
 
-    if (!isset($options) && !isset($values))
-        return ''; /* raise error here? */
+    if (!isset($options) && !isset($values)) {
+        return '';
+    } /* raise error here? */
 
     $_html_result = array();
 
@@ -159,15 +160,15 @@ function smarty_function_html_checkboxes($params, $template)
         }
     }
 
-    if(!empty($params['assign'])) {
+    if (!empty($params['assign'])) {
         $template->assign($params['assign'], $_html_result);
     } else {
         return implode("\n", $_html_result);
     }
-
 }
 
-function smarty_function_html_checkboxes_output($name, $value, $output, $selected, $extra, $separator, $labels, $label_ids, $escape=true) {
+function smarty_function_html_checkboxes_output($name, $value, $output, $selected, $extra, $separator, $labels, $label_ids, $escape=true)
+{
     $_output = '';
     
     if (is_object($value)) {
@@ -198,7 +199,7 @@ function smarty_function_html_checkboxes_output($name, $value, $output, $selecte
             $_output .= '<label for="' . $_id . '">';
         } else {
             $_output .= '<label>';
-        } 
+        }
     }
     
     $name = smarty_function_escape_special_chars($name);

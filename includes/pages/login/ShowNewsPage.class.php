@@ -30,31 +30,30 @@
 
 class ShowNewsPage extends AbstractPage
 {
-	public static $requireModule = 0;
+    public static $requireModule = 0;
 
-	function __construct() 
-	{
-		parent::__construct();
-	}
-	
-	function show() 
-	{		
-		$newsResult	= $GLOBALS['DATABASE']->query("SELECT date, title, text, user FROM ".NEWS." ORDER BY id DESC;");
-		$newsList	= array();
-		
-		while ($newsRow = $GLOBALS['DATABASE']->fetchArray($newsResult))
-		{
-			$newsList[]	= array(
-				'title' => $newsRow['title'],
-				'from' 	=> t('news_from', _date(t('php_tdformat'), $newsRow['date']), $newsRow['user']),
-				'text' 	=> makebr($newsRow['text']),
-			);
-		}
-		
-		$this->assign(array(
-			'newsList'	=> $newsList,
-		));
-		
-		$this->render('page.news.default.tpl');
-	}
+    public function __construct()
+    {
+        parent::__construct();
+    }
+    
+    public function show()
+    {
+        $newsResult    = $GLOBALS['DATABASE']->query("SELECT date, title, text, user FROM ".NEWS." ORDER BY id DESC;");
+        $newsList    = array();
+        
+        while ($newsRow = $GLOBALS['DATABASE']->fetchArray($newsResult)) {
+            $newsList[]    = array(
+                'title' => $newsRow['title'],
+                'from'    => t('news_from', _date(t('php_tdformat'), $newsRow['date']), $newsRow['user']),
+                'text'    => makebr($newsRow['text']),
+            );
+        }
+        
+        $this->assign(array(
+            'newsList'    => $newsList,
+        ));
+        
+        $this->render('page.news.default.tpl');
+    }
 }

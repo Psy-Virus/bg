@@ -7,15 +7,16 @@
  * @link https://blueimp.net/ajax/
  */
 
-class CustomAJAXChatInterface extends CustomAJAXChat {
+class CustomAJAXChatInterface extends CustomAJAXChat
+{
 
-	function initialize() {
-		// Initialize configuration settings:
-		$this->initConfig();
+    public function initialize()
+    {
+        // Initialize configuration settings:
+        $this->initConfig();
 
-		// Initialize the DataBase connection:
-		$this->initDataBaseConnection();
-	}
-
+        // Initialize the DataBase connection:
+        $this->initDataBaseConnection();
+    }
 }
 ?>

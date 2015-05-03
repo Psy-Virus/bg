@@ -26,30 +26,28 @@
  * @link http://2moons.cc/
  */
 
-if ($USER['authlevel'] == AUTH_USR)
-{
-	throw new PagePermissionException("Permission error!");
+if ($USER['authlevel'] == AUTH_USR) {
+    throw new PagePermissionException("Permission error!");
 }
 
 function ShowLoginPage()
 {
-	global $USER, $LNG;
-	
-	if(isset($_REQUEST['admin_pw']))
-	{
-		$password	= cryptPassword($_REQUEST['admin_pw']);
+    global $USER, $LNG;
+    
+    if (isset($_REQUEST['admin_pw'])) {
+        $password    = cryptPassword($_REQUEST['admin_pw']);
 
-		if ($password == $USER['password']) {
-			$_SESSION['admin_login']	= $password;
-			HTTP::redirectTo('admin.php');
-		}
-	}
+        if ($password == $USER['password']) {
+            $_SESSION['admin_login']    = $password;
+            HTTP::redirectTo('admin.php');
+        }
+    }
 
-	$template	= new template();
+    $template    = new template();
 
-	$template->assign_vars(array(	
-		'bodyclass'	=> 'standalone',
-		'username'	=> $USER['username']
-	));
-	$template->show('LoginPage.tpl');
+    $template->assign_vars(array(
+        'bodyclass'    => 'standalone',
+        'username'    => $USER['username']
+    ));
+    $template->show('LoginPage.tpl');
 }

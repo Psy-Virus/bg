@@ -31,155 +31,147 @@
 
 class ShowLostPasswordPage extends AbstractPage
 {
-	public static $requireModule = 0;
+    public static $requireModule = 0;
 
-	function __construct() 
-	{
-		parent::__construct();
-	}
-	
-	function show() 
-	{
-		$universeSelect	= array();		
-		$uniAllConfig	= Config::getAll('universe');
-		
-		foreach($uniAllConfig as $uniID => $uniConfig)
-		{
-			$universeSelect[$uniID]	= $uniConfig['uni_name'];
-		}
-		
-		$this->assign(array(
-			'universeSelect'	=> $universeSelect
-		));
-		
-		$this->render('page.lostPassword.default.tpl');
-	}
-	
-	function newPassword() 
-	{
-		$userID			= HTTP::_GP('u', 0);
-		$validationKey	= HTTP::_GP('k', '');
-		
-		$isValid	= $GLOBALS['DATABASE']->getFirstCell("SELECT COUNT(*) FROM ".LOSTPASSWORD." WHERE userID = ".$userID." AND `key` = '".$GLOBALS['DATABASE']->escape($validationKey)."' AND time > ".(TIMESTAMP - 1800)." AND hasChanged = 0;");
-		
-		if(empty($isValid))
-		{
-			$this->printMessage(t('passwordValidInValid'), NULL, array(array(
-				'label'	=> t('passwordBack'),
-				'url'	=> 'index.php',
-			)));
-		}
-		
-		$newPassword	= uniqid();
+    public function __construct()
+    {
+        parent::__construct();
+    }
+    
+    public function show()
+    {
+        $universeSelect    = array();
+        $uniAllConfig    = Config::getAll('universe');
+        
+        foreach ($uniAllConfig as $uniID => $uniConfig) {
+            $universeSelect[$uniID]    = $uniConfig['uni_name'];
+        }
+        
+        $this->assign(array(
+            'universeSelect'    => $universeSelect
+        ));
+        
+        $this->render('page.lostPassword.default.tpl');
+    }
+    
+    public function newPassword()
+    {
+        $userID            = HTTP::_GP('u', 0);
+        $validationKey    = HTTP::_GP('k', '');
+        
+        $isValid    = $GLOBALS['DATABASE']->getFirstCell("SELECT COUNT(*) FROM ".LOSTPASSWORD." WHERE userID = ".$userID." AND `key` = '".$GLOBALS['DATABASE']->escape($validationKey)."' AND time > ".(TIMESTAMP - 1800)." AND hasChanged = 0;");
+        
+        if (empty($isValid)) {
+            $this->printMessage(t('passwordValidInValid'), NULL, array(array(
+                'label'    => t('passwordBack'),
+                'url'    => 'index.php',
+            )));
+        }
+        
+        $newPassword    = uniqid();
 
-		$userData		= $GLOBALS['DATABASE']->getFirstRow("SELECT username, email_2 as mail FROM ".USERS." WHERE id = ".$userID.";");
+        $userData        = $GLOBALS['DATABASE']->getFirstRow("SELECT username, email_2 as mail FROM ".USERS." WHERE id = ".$userID.";");
 
-		$MailRAW		= $GLOBALS['LNG']->getTemplate('email_lost_password_changed');
-		$MailContent	= str_replace(array(
-			'{USERNAME}',
-			'{GAMENAME}',
-			'{GAMEMAIL}',
-			'{PASSWORD}',
-		), array(
-			$userData['username'],
-			Config::get('game_name').' - '.Config::get('uni_name'),
-			Config::get('smtp_sendmail'),
-			$newPassword,
-		), $MailRAW);
-		
-		$GLOBALS['DATABASE']->query("UPDATE ".USERS." SET password = '".PlayerUtil::cryptPassword($newPassword)."' WHERE id = ".$userID.";");
-		
-		require 'includes/classes/Mail.class.php';		
-		Mail::send($userData['mail'], $userData['username'], t('passwordChangedMailTitle', Config::get('game_name')), $MailContent);
-		
-		$GLOBALS['DATABASE']->query("UPDATE ".LOSTPASSWORD." SET hasChanged = 1 WHERE userID = ".$userID." AND `key` = '".$GLOBALS['DATABASE']->escape($validationKey)."';");
-		$this->printMessage(t('passwordChangedMailSend'), NULL, array(array(
-			'label'	=> t('passwordNext'),
-			'url'	=> 'index.php',
-		)));
-	}
-	
-	function send()
-	{
-		$username	= HTTP::_GP('username', '', UTF8_SUPPORT);
-		$mail		= HTTP::_GP('mail', '', true);
-		
-		$errorMessages	= array();
-		
-		if(empty($username))
-		{
-			$errorMessages[]	= t('passwordUsernameEmpty');
-		}
-		
-		if(empty($mail))
-		{
-			$errorMessages[]	= t('passwordErrorMailEmpty');
-		}
-		
-		
-		if (Config::get('capaktiv') === '1') {
-			require_once('includes/libs/reCAPTCHA/recaptchalib.php');
-			
-			$resp = recaptcha_check_answer(Config::get('capprivate'), $_SERVER['REMOTE_ADDR'], $_REQUEST['recaptcha_challenge_field'], $_REQUEST['recaptcha_response_field']);
-		
-			if (!$resp->is_valid)
-			{
-				$errorMessages[]	=  t('registerErrorCaptcha');
-			}
-		}
-		
-		if(!empty($errorMessages))
-		{
-			$message	= implode("<br>\r\n", $errorMessages);
-			$this->printMessage($message, NULL, array(array(
-				'label'	=> t('passwordBack'),
-				'url'	=> 'index.php?page=lostPassword',
-			)));
-		}
-		
-		
-		$userID	= $GLOBALS['DATABASE']->getFirstCell("SELECT id FROM ".USERS." WHERE universe = ".$GLOBALS['UNI']." AND username = '".$GLOBALS['DATABASE']->escape($username)."' AND email_2 = '".$GLOBALS['DATABASE']->escape($mail)."';");
-		
-		if(empty($userID))
-		{
-			$this->printMessage(t('passwordErrorUnknown'), NULL, array(array(
-				'label'	=> t('passwordBack'),
-				'url'	=> 'index.php?page=lostPassword',
-			)));
-		}
-		
-		$hasChanged	= $GLOBALS['DATABASE']->getFirstCell("SELECT COUNT(*) FROM ".LOSTPASSWORD." WHERE userID = ".$userID." AND time > ".(TIMESTAMP - 86400)." AND hasChanged = 0;");
-		if(!empty($hasChanged))
-		{
-			$this->printMessage(t('passwordErrorOnePerDay'), NULL, array(array(
-				'label'	=> t('passwordBack'),
-				'url'	=> 'index.php?page=lostPassword',
-			)));
-		}
-		
-		$validationKey	= md5(uniqid());
-						
-		$MailRAW		= $GLOBALS['LNG']->getTemplate('email_lost_password_validation');
-		
-		$MailContent	= str_replace(array(
-			'{USERNAME}',
-			'{GAMENAME}',
-			'{VALIDURL}',
-		), array(
-			$username,
-			Config::get('game_name').' - '.Config::get('uni_name'),
-			HTTP_PATH.'index.php?page=lostPassword&mode=newPassword&u='.$userID.'&k='.$validationKey,
-		), $MailRAW);
-		
-		require 'includes/classes/Mail.class.php';
-		
-		Mail::send($mail, $username, t('passwordValidMailTitle', Config::get('game_name')), $MailContent);
-		
-		$GLOBALS['DATABASE']->query("INSERT INTO ".LOSTPASSWORD." SET userID = ".$userID.", `key` = '".$validationKey."', time = ".TIMESTAMP.", fromIP = '".$_SERVER['REMOTE_ADDR']."';");
-		
-		$this->printMessage(t('passwordValidMailSend'), NULL, array(array(
-			'label'	=> t('passwordNext'),
-			'url'	=> 'index.php',
-		)));
-	}
+        $MailRAW        = $GLOBALS['LNG']->getTemplate('email_lost_password_changed');
+        $MailContent    = str_replace(array(
+            '{USERNAME}',
+            '{GAMENAME}',
+            '{GAMEMAIL}',
+            '{PASSWORD}',
+        ), array(
+            $userData['username'],
+            Config::get('game_name').' - '.Config::get('uni_name'),
+            Config::get('smtp_sendmail'),
+            $newPassword,
+        ), $MailRAW);
+        
+        $GLOBALS['DATABASE']->query("UPDATE ".USERS." SET password = '".PlayerUtil::cryptPassword($newPassword)."' WHERE id = ".$userID.";");
+        
+        require 'includes/classes/Mail.class.php';
+        Mail::send($userData['mail'], $userData['username'], t('passwordChangedMailTitle', Config::get('game_name')), $MailContent);
+        
+        $GLOBALS['DATABASE']->query("UPDATE ".LOSTPASSWORD." SET hasChanged = 1 WHERE userID = ".$userID." AND `key` = '".$GLOBALS['DATABASE']->escape($validationKey)."';");
+        $this->printMessage(t('passwordChangedMailSend'), NULL, array(array(
+            'label'    => t('passwordNext'),
+            'url'    => 'index.php',
+        )));
+    }
+    
+    public function send()
+    {
+        $username    = HTTP::_GP('username', '', UTF8_SUPPORT);
+        $mail        = HTTP::_GP('mail', '', true);
+        
+        $errorMessages    = array();
+        
+        if (empty($username)) {
+            $errorMessages[]    = t('passwordUsernameEmpty');
+        }
+        
+        if (empty($mail)) {
+            $errorMessages[]    = t('passwordErrorMailEmpty');
+        }
+        
+        
+        if (Config::get('capaktiv') === '1') {
+            require_once('includes/libs/reCAPTCHA/recaptchalib.php');
+            
+            $resp = recaptcha_check_answer(Config::get('capprivate'), $_SERVER['REMOTE_ADDR'], $_REQUEST['recaptcha_challenge_field'], $_REQUEST['recaptcha_response_field']);
+        
+            if (!$resp->is_valid) {
+                $errorMessages[]    =  t('registerErrorCaptcha');
+            }
+        }
+        
+        if (!empty($errorMessages)) {
+            $message    = implode("<br>\r\n", $errorMessages);
+            $this->printMessage($message, NULL, array(array(
+                'label'    => t('passwordBack'),
+                'url'    => 'index.php?page=lostPassword',
+            )));
+        }
+        
+        
+        $userID    = $GLOBALS['DATABASE']->getFirstCell("SELECT id FROM ".USERS." WHERE universe = ".$GLOBALS['UNI']." AND username = '".$GLOBALS['DATABASE']->escape($username)."' AND email_2 = '".$GLOBALS['DATABASE']->escape($mail)."';");
+        
+        if (empty($userID)) {
+            $this->printMessage(t('passwordErrorUnknown'), NULL, array(array(
+                'label'    => t('passwordBack'),
+                'url'    => 'index.php?page=lostPassword',
+            )));
+        }
+        
+        $hasChanged    = $GLOBALS['DATABASE']->getFirstCell("SELECT COUNT(*) FROM ".LOSTPASSWORD." WHERE userID = ".$userID." AND time > ".(TIMESTAMP - 86400)." AND hasChanged = 0;");
+        if (!empty($hasChanged)) {
+            $this->printMessage(t('passwordErrorOnePerDay'), NULL, array(array(
+                'label'    => t('passwordBack'),
+                'url'    => 'index.php?page=lostPassword',
+            )));
+        }
+        
+        $validationKey    = md5(uniqid());
+                        
+        $MailRAW        = $GLOBALS['LNG']->getTemplate('email_lost_password_validation');
+        
+        $MailContent    = str_replace(array(
+            '{USERNAME}',
+            '{GAMENAME}',
+            '{VALIDURL}',
+        ), array(
+            $username,
+            Config::get('game_name').' - '.Config::get('uni_name'),
+            HTTP_PATH.'index.php?page=lostPassword&mode=newPassword&u='.$userID.'&k='.$validationKey,
+        ), $MailRAW);
+        
+        require 'includes/classes/Mail.class.php';
+        
+        Mail::send($mail, $username, t('passwordValidMailTitle', Config::get('game_name')), $MailContent);
+        
+        $GLOBALS['DATABASE']->query("INSERT INTO ".LOSTPASSWORD." SET userID = ".$userID.", `key` = '".$validationKey."', time = ".TIMESTAMP.", fromIP = '".$_SERVER['REMOTE_ADDR']."';");
+        
+        $this->printMessage(t('passwordValidMailSend'), NULL, array(array(
+            'label'    => t('passwordNext'),
+            'url'    => 'index.php',
+        )));
+    }
 }

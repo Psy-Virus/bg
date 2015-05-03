@@ -15,7 +15,8 @@
  * @package Smarty
  * @subpackage Compiler
  */
-class Smarty_Internal_Compile_Private_Special_Variable extends Smarty_Internal_CompileBase {
+class Smarty_Internal_Compile_Private_Special_Variable extends Smarty_Internal_CompileBase
+{
 
     /**
      * Compiles code for the speical $smarty variables
@@ -105,7 +106,6 @@ class Smarty_Internal_Compile_Private_Special_Variable extends Smarty_Internal_C
         }
         return $compiled_ref;
     }
-
 }
 
 ?>

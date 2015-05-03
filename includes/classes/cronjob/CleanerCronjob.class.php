@@ -29,53 +29,49 @@
 
 class CleanerCronjob
 {
-	function run()
-	{
-		$CONF	= Config::getAll(NULL, ROOT_UNI);
-		
-		$unis	= array_keys(Config::getAll(NULL));
-		
-		$GLOBALS['DATABASE']->query("LOCK TABLES ".ALLIANCE." WRITE, ".ALLIANCE_REQUEST." WRITE,
-									".BUDDY." WRITE, ".CONFIG." WRITE, ".FLEETS." WRITE, ".FLEETS_EVENT." WRITE, 
-									".NOTES." WRITE, ".MESSAGES." WRITE, ".PLANETS." WRITE, 
-									".RW." WRITE, ".SESSION." WRITE, ".STATPOINTS." WRITE, 
+    public function run()
+    {
+        $CONF    = Config::getAll(NULL, ROOT_UNI);
+        
+        $unis    = array_keys(Config::getAll(NULL));
+        
+        $GLOBALS['DATABASE']->query("LOCK TABLES ".ALLIANCE." WRITE, ".ALLIANCE_REQUEST." WRITE,
+									".BUDDY." WRITE, ".CONFIG." WRITE, ".FLEETS." WRITE, ".FLEETS_EVENT." WRITE,
+									".NOTES." WRITE, ".MESSAGES." WRITE, ".PLANETS." WRITE,
+									".RW." WRITE, ".SESSION." WRITE, ".STATPOINTS." WRITE,
 									".TOPKB." WRITE, ".TOPKB_USERS." WRITE, ".USERS." WRITE;");
-	
-		//Delete old messages
-		$del_before 	= TIMESTAMP - ($CONF['del_oldstuff'] * 86400);
-		$del_inactive 	= TIMESTAMP - ($CONF['del_user_automatic'] * 86400);
-		$del_deleted 	= TIMESTAMP - ($CONF['del_user_manually'] * 86400);
+    
+        //Delete old messages
+        $del_before    = TIMESTAMP - ($CONF['del_oldstuff'] * 86400);
+        $del_inactive    = TIMESTAMP - ($CONF['del_user_automatic'] * 86400);
+        $del_deleted    = TIMESTAMP - ($CONF['del_user_manually'] * 86400);
 
-		$GLOBALS['DATABASE']->multi_query("DELETE FROM ".MESSAGES." WHERE `message_time` < '". $del_before ."';
+        $GLOBALS['DATABASE']->multi_query("DELETE FROM ".MESSAGES." WHERE `message_time` < '". $del_before ."';
 						  DELETE FROM ".ALLIANCE." WHERE `ally_members` = '0';
 						  DELETE FROM ".PLANETS." WHERE `destruyed` < ".TIMESTAMP." AND `destruyed` != 0;
 						  DELETE FROM ".SESSION." WHERE `lastonline` < '".(TIMESTAMP - SESSION_LIFETIME)."';
 						  DELETE FROM ".FLEETS_EVENT." WHERE fleetID NOT IN (SELECT fleet_id FROM ".FLEETS.");
 						  UPDATE ".USERS." SET `email_2` = `email` WHERE `setmail` < '".TIMESTAMP."';");
 
-		$ChooseToDelete = $GLOBALS['DATABASE']->query("SELECT `id` FROM `".USERS."` WHERE `authlevel` = '".AUTH_USR."' AND ((`db_deaktjava` != 0 AND `db_deaktjava` < '".$del_deleted."')".($del_inactive == TIMESTAMP ? "" : " OR `onlinetime` < '".$del_inactive."'").");");
+        $ChooseToDelete = $GLOBALS['DATABASE']->query("SELECT `id` FROM `".USERS."` WHERE `authlevel` = '".AUTH_USR."' AND ((`db_deaktjava` != 0 AND `db_deaktjava` < '".$del_deleted."')".($del_inactive == TIMESTAMP ? "" : " OR `onlinetime` < '".$del_inactive."'").");");
 
-		if(isset($ChooseToDelete))
-		{
-			include_once('includes/functions/DeleteSelectedUser.php');
-			while($delete = $GLOBALS['DATABASE']->fetch_array($ChooseToDelete))
-			{
-				DeleteSelectedUser($delete['id']);
-			}	
-		}
-		
-		$GLOBALS['DATABASE']->free_result($ChooseToDelete);
-		
-		foreach($unis as $uni)
-		{
-			$battleHallLowest	= $GLOBALS['DATABASE']->getFirstCell("SELECT units FROM ".TOPKB." WHERE `universe` = ".$uni." ORDER BY units DESC LIMIT 99,1;");
-			if(isset($battleHallLowest))
-			{
-				$GLOBALS['DATABASE']->query("DELETE ".TOPKB.", ".TOPKB_USERS." FROM ".TOPKB." INNER JOIN ".TOPKB_USERS." USING (rid) WHERE `universe` = ".$uni." AND `units` < ".$battleHallLowest.";");
-			}
-		}
+        if (isset($ChooseToDelete)) {
+            include_once('includes/functions/DeleteSelectedUser.php');
+            while ($delete = $GLOBALS['DATABASE']->fetch_array($ChooseToDelete)) {
+                DeleteSelectedUser($delete['id']);
+            }
+        }
+        
+        $GLOBALS['DATABASE']->free_result($ChooseToDelete);
+        
+        foreach ($unis as $uni) {
+            $battleHallLowest    = $GLOBALS['DATABASE']->getFirstCell("SELECT units FROM ".TOPKB." WHERE `universe` = ".$uni." ORDER BY units DESC LIMIT 99,1;");
+            if (isset($battleHallLowest)) {
+                $GLOBALS['DATABASE']->query("DELETE ".TOPKB.", ".TOPKB_USERS." FROM ".TOPKB." INNER JOIN ".TOPKB_USERS." USING (rid) WHERE `universe` = ".$uni." AND `units` < ".$battleHallLowest.";");
+            }
+        }
 
-		$GLOBALS['DATABASE']->query("DELETE FROM ".RW." WHERE `time` < ". $del_before ." AND `rid` NOT IN (SELECT `rid` FROM ".TOPKB.");");
-		$GLOBALS['DATABASE']->query("UNLOCK TABLES;");
-	}
+        $GLOBALS['DATABASE']->query("DELETE FROM ".RW." WHERE `time` < ". $del_before ." AND `rid` NOT IN (SELECT `rid` FROM ".TOPKB.");");
+        $GLOBALS['DATABASE']->query("UNLOCK TABLES;");
+    }
 }

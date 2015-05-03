@@ -26,72 +26,65 @@
  * @link http://2moons.cc/
  */
 
-class HTTP {
-	
-	static public function redirectTo($URL, $external = false)
-	{
-		if($external)
-		{
-			self::sendHeader('Location', $URL);
-		}
-		else
-		{
-			self::sendHeader('Location', HTTP_PATH.$URL);
-		}
-		exit;
-	}
-	
-	static public function sendHeader($name, $value = NULL)
-	{
-		header($name.(!is_null($value) ? ': '.$value : ''));
-	}
-	
-	static public function sendCookie($name, $value = "", $toTime = NULL)
-	{
-		setcookie($name, $value, $toTime);
-	}
-	
-	static public function _GP($name, $default, $multibyte = false, $highnum = false)
-	{
-		if(!isset($_REQUEST[$name]))
-		{
-			return $default;
-		}
-		
-		if(is_int($default))
-		{
-			return (int) $_REQUEST[$name];			
-		}
-		
-		if(is_float($default))
-		{
-			return (float) $_REQUEST[$name];			
-		}
-		
-		if(is_string($default))
-		{
-			$var = trim(htmlspecialchars(str_replace(array("\r\n", "\r", "\0"), array("\n", "\n", ''), $_REQUEST[$name]), ENT_QUOTES, 'UTF-8'));
-			
-			if (empty($var)) {
-				return $default;				
-			}
-			
-			if ($multibyte) {
-				if (!preg_match('/^./u', $var)) {
-					$var = '';
-				}
-			} else {
-				$var = preg_replace('/[\x80-\xFF]/', '?', $var); // no multibyte, allow only ASCII (0-127)
-			}
-			
-			return $var;
-		}
-		
-		if(is_array($default))
-		{
-			return (array) $_REQUEST[$name];
-		}
-		
-		return $default;
-	}
+class HTTP
+{
+    
+    public static function redirectTo($URL, $external = false)
+    {
+        if ($external) {
+            self::sendHeader('Location', $URL);
+        } else {
+            self::sendHeader('Location', HTTP_PATH.$URL);
+        }
+        exit;
+    }
+    
+    public static function sendHeader($name, $value = NULL)
+    {
+        header($name.(!is_null($value) ? ': '.$value : ''));
+    }
+    
+    public static function sendCookie($name, $value = "", $toTime = NULL)
+    {
+        setcookie($name, $value, $toTime);
+    }
+    
+    public static function _GP($name, $default, $multibyte = false, $highnum = false)
+    {
+        if (!isset($_REQUEST[$name])) {
+            return $default;
+        }
+        
+        if (is_int($default)) {
+            return (int) $_REQUEST[$name];
+        }
+        
+        if (is_float($default)) {
+            return (float) $_REQUEST[$name];
+        }
+        
+        if (is_string($default)) {
+            $var = trim(htmlspecialchars(str_replace(array("\r\n", "\r", "\0"), array("\n", "\n", ''), $_REQUEST[$name]), ENT_QUOTES, 'UTF-8'));
+            
+            if (empty($var)) {
+                return $default;
+            }
+            
+            if ($multibyte) {
+                if (!preg_match('/^./u', $var)) {
+                    $var = '';
+                }
+            } else {
+                $var = preg_replace('/[\x80-\xFF]/', '?', $var); // no multibyte, allow only ASCII (0-127)
+            }
+            
+            return $var;
+        }
+        
+        if (is_array($default)) {
+            return (array) $_REQUEST[$name];
+        }
+        
+        return $default;
+    }
 }

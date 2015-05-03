@@ -15,7 +15,8 @@
  * @package Smarty
  * @subpackage Template
  */
-abstract class Smarty_Internal_TemplateBase extends Smarty_Internal_Data {
+abstract class Smarty_Internal_TemplateBase extends Smarty_Internal_Data
+{
 
     /**
      * fetches a rendered Smarty template
@@ -740,7 +741,8 @@ abstract class Smarty_Internal_TemplateBase extends Smarty_Internal_Data {
      * @param string $match match string
      * @return string replacemant
      */
-    private function replaceCamelcase($match) {
+    private function replaceCamelcase($match)
+    {
         return "_" . strtolower($match[1]);
     }
 
@@ -779,24 +781,30 @@ abstract class Smarty_Internal_TemplateBase extends Smarty_Internal_Data {
                 $_is_this = null;
                 if (property_exists($this, $property_name)) {
                     $_is_this = true;
-                } else if (property_exists($this->smarty, $property_name)) {
-                    $_is_this = false;
+                } else {
+                    if (property_exists($this->smarty, $property_name)) {
+                        $_is_this = false;
+                    }
                 }
                 $_resolved_property_source[$property_name] = $_is_this;
             }
             if ($_is_this) {
-                if ($first3 == 'get')
-                return $this->$property_name;
-                else
-                return $this->$property_name = $args[0];
-            } else if ($_is_this === false) {
-                if ($first3 == 'get')
-                return $this->smarty->$property_name;
-                else
-                return $this->smarty->$property_name = $args[0];
+                if ($first3 == 'get') {
+                    return $this->$property_name;
+                } else {
+                    return $this->$property_name = $args[0];
+                }
             } else {
-                throw new SmartyException("property '$property_name' does not exist.");
-                return false;
+                if ($_is_this === false) {
+                    if ($first3 == 'get') {
+                        return $this->smarty->$property_name;
+                    } else {
+                        return $this->smarty->$property_name = $args[0];
+                    }
+                } else {
+                    throw new SmartyException("property '$property_name' does not exist.");
+                    return false;
+                }
             }
         }
         if ($name == 'Smarty') {
@@ -805,7 +813,6 @@ abstract class Smarty_Internal_TemplateBase extends Smarty_Internal_Data {
         // must be unknown
         throw new SmartyException("Call of unknown method '$name'.");
     }
-
 }
 
 ?>

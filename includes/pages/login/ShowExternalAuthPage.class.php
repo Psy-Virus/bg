@@ -30,44 +30,44 @@
 
 class ShowExternalAuthPage extends AbstractPage
 {
-	public static $requireModule = 0;
+    public static $requireModule = 0;
 
-	function __construct() 
-	{
-		parent::__construct();
-	}
-	
-	function show() 
-	{
-		$method			= HTTP::_GP('method', '');
-		$method			= strtolower(str_replace(array('_', '\\', '/', '.', "\0"), '', $method));
-		
-		if(!file_exists('includes/extauth/'.$method.'.class.php')) {
-			HTTP::redirectTo('index.php');			
-		}
-		
-		Session::init();
-		
-		require('includes/extauth/'.$method.'.class.php');
-		
-		$methodClass	= ucwords($method).'Auth';
-		$authObj		= new $methodClass;
-		
-		if(!$authObj->isActiveMode()) {
-			$this->redirectTo('index.php?code=5');
-		}
-		
-		if(!$authObj->isVaild()) {
-			$this->redirectTo('index.php?code=4');
-		}
-		
-		$loginData	= $authObj->getLoginData();
-		
-		if(empty($loginData)) {
-			$this->redirectTo('index.php?page=register&externalAuth[account]='.$authObj->getAccount().'&externalAuth[method]=facebook');
-		}
-		
-		Session::create($loginData['id'], $loginData['id_planet']);
-		$this->redirectTo("game.php");	
-	}
+    public function __construct()
+    {
+        parent::__construct();
+    }
+    
+    public function show()
+    {
+        $method            = HTTP::_GP('method', '');
+        $method            = strtolower(str_replace(array('_', '\\', '/', '.', "\0"), '', $method));
+        
+        if (!file_exists('includes/extauth/'.$method.'.class.php')) {
+            HTTP::redirectTo('index.php');
+        }
+        
+        Session::init();
+        
+        require('includes/extauth/'.$method.'.class.php');
+        
+        $methodClass    = ucwords($method).'Auth';
+        $authObj        = new $methodClass;
+        
+        if (!$authObj->isActiveMode()) {
+            $this->redirectTo('index.php?code=5');
+        }
+        
+        if (!$authObj->isVaild()) {
+            $this->redirectTo('index.php?code=4');
+        }
+        
+        $loginData    = $authObj->getLoginData();
+        
+        if (empty($loginData)) {
+            $this->redirectTo('index.php?page=register&externalAuth[account]='.$authObj->getAccount().'&externalAuth[method]=facebook');
+        }
+        
+        Session::create($loginData['id'], $loginData['id_planet']);
+        $this->redirectTo("game.php");
+    }
 }

@@ -28,37 +28,37 @@
 
 function CreateOnePlanetRecord($Galaxy, $System, $Position, $Universe, $PlanetOwnerID, $PlanetName = '', $HomeWorld = false, $AuthLevel = 0)
 {
-	global $LNG;
+    global $LNG;
 
-	$CONF	= Config::getAll(NULL, $Universe);
-	if (Config::get('max_galaxy') < $Galaxy || 1 > $Galaxy) {
-		throw new Exception("Access denied for CreateOnePlanetRecord.php.<br>Try to create a planet at position:".$Galaxy.":".$System.":".$Position);
-	}	
-	
-	if (Config::get('max_system') < $System || 1 > $System) {
-		throw new Exception("Access denied for CreateOnePlanetRecord.php.<br>Try to create a planet at position:".$Galaxy.":".$System.":".$Position);
-	}	
-	
-	if (Config::get('max_planets') < $Position || 1 > $Position) {
-		throw new Exception("Access denied for CreateOnePlanetRecord.php.<br>Try to create a planet at position:".$Galaxy.":".$System.":".$Position);
-	}
-	
-	if (CheckPlanetIfExist($Galaxy, $System, $Position, $Universe)) {
-		return false;
-	}
+    $CONF    = Config::getAll(NULL, $Universe);
+    if (Config::get('max_galaxy') < $Galaxy || 1 > $Galaxy) {
+        throw new Exception("Access denied for CreateOnePlanetRecord.php.<br>Try to create a planet at position:".$Galaxy.":".$System.":".$Position);
+    }
+    
+    if (Config::get('max_system') < $System || 1 > $System) {
+        throw new Exception("Access denied for CreateOnePlanetRecord.php.<br>Try to create a planet at position:".$Galaxy.":".$System.":".$Position);
+    }
+    
+    if (Config::get('max_planets') < $Position || 1 > $Position) {
+        throw new Exception("Access denied for CreateOnePlanetRecord.php.<br>Try to create a planet at position:".$Galaxy.":".$System.":".$Position);
+    }
+    
+    if (CheckPlanetIfExist($Galaxy, $System, $Position, $Universe)) {
+        return false;
+    }
 
-	$FieldFactor		= Config::get('planet_factor');
-	require('includes/PlanetData.php');
-	$Pos                = ceil($Position / (Config::get('max_planets') / count($PlanetData))); 
-	$TMax				= $PlanetData[$Pos]['temp'];
-	$TMin				= $TMax - 40;
-	$Fields				= $PlanetData[$Pos]['fields'] * Config::get('planet_factor');
-	$Types				= array_keys($PlanetData[$Pos]['image']);
-	$Type				= $Types[array_rand($Types)];
-	$Class				= $Type.'planet'.($PlanetData[$Pos]['image'][$Type] < 10 ? '0' : '').$PlanetData[$Pos]['image'][$Type];
-	$Name				= !empty($PlanetName) ? $GLOBALS['DATABASE']->sql_escape($PlanetName) : $LNG['type_planet'][1];
-	
-	$GLOBALS['DATABASE']->query("INSERT INTO ".PLANETS." SET
+    $FieldFactor        = Config::get('planet_factor');
+    require('includes/PlanetData.php');
+    $Pos                = ceil($Position / (Config::get('max_planets') / count($PlanetData)));
+    $TMax                = $PlanetData[$Pos]['temp'];
+    $TMin                = $TMax - 40;
+    $Fields                = $PlanetData[$Pos]['fields'] * Config::get('planet_factor');
+    $Types                = array_keys($PlanetData[$Pos]['image']);
+    $Type                = $Types[array_rand($Types)];
+    $Class                = $Type.'planet'.($PlanetData[$Pos]['image'][$Type] < 10 ? '0' : '').$PlanetData[$Pos]['image'][$Type];
+    $Name                = !empty($PlanetName) ? $GLOBALS['DATABASE']->sql_escape($PlanetName) : $LNG['type_planet'][1];
+    
+    $GLOBALS['DATABASE']->query("INSERT INTO ".PLANETS." SET
 				name = '".$Name."',
 				universe = ".$Universe.",
 				id_owner = ".$PlanetOwnerID.",
@@ -79,5 +79,5 @@ function CreateOnePlanetRecord($Galaxy, $System, $Position, $Universe, $PlanetOw
 				deuterium = ".Config::get('deuterium_start').",
 				deuterium_perhour = ".Config::get('deuterium_basic_income').";");
 
-	return $GLOBALS['DATABASE']->GetInsertID();
+    return $GLOBALS['DATABASE']->GetInsertID();
 }

@@ -31,42 +31,38 @@
 
 class ShowLoginPage extends AbstractPage
 {
-	public static $requireModule = 0;
+    public static $requireModule = 0;
 
-	function __construct() 
-	{
-		parent::__construct();
-	}
-	
-	function show() 
-	{
-		if (empty($_POST)) {
-			HTTP::redirectTo('index.php');	
-		}
-		
-		$username = HTTP::_GP('username', '', UTF8_SUPPORT);
-		$password = HTTP::_GP('password', '', true);
-		
-		$loginData = $GLOBALS['DATABASE']->getFirstRow("SELECT id, password FROM ".USERS." WHERE universe = ".$GLOBALS['UNI']." AND username = '".$GLOBALS['DATABASE']->escape($username)."';");
-		if (isset($loginData))
-		{
-			$hashedPassword = PlayerUtil::cryptPassword($password);
-			if($loginData['password'] != $hashedPassword)
-			{
-				// Fallback pre 1.7
-				if($loginData['password'] == md5($password)) {
-					$GLOBALS['DATABASE']->query("UPDATE ".USERS." SET password = '".$hashedPassword."' WHERE id = ".$loginData['id'].";");
-				} else {
-					HTTP::redirectTo('index.php?code=1');	
-				}
-			}
-			
-			Session::create($loginData['id']);
-			HTTP::redirectTo('game.php');	
-		}
-		else
-		{
-			Session::redirectCode(1);	
-		}
-	}
+    public function __construct()
+    {
+        parent::__construct();
+    }
+    
+    public function show()
+    {
+        if (empty($_POST)) {
+            HTTP::redirectTo('index.php');
+        }
+        
+        $username = HTTP::_GP('username', '', UTF8_SUPPORT);
+        $password = HTTP::_GP('password', '', true);
+        
+        $loginData = $GLOBALS['DATABASE']->getFirstRow("SELECT id, password FROM ".USERS." WHERE universe = ".$GLOBALS['UNI']." AND username = '".$GLOBALS['DATABASE']->escape($username)."';");
+        if (isset($loginData)) {
+            $hashedPassword = PlayerUtil::cryptPassword($password);
+            if ($loginData['password'] != $hashedPassword) {
+                // Fallback pre 1.7
+                if ($loginData['password'] == md5($password)) {
+                    $GLOBALS['DATABASE']->query("UPDATE ".USERS." SET password = '".$hashedPassword."' WHERE id = ".$loginData['id'].";");
+                } else {
+                    HTTP::redirectTo('index.php?code=1');
+                }
+            }
+            
+            Session::create($loginData['id']);
+            HTTP::redirectTo('game.php');
+        } else {
+            Session::redirectCode(1);
+        }
+    }
 }

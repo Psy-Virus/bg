@@ -10,7 +10,8 @@
  * @author Uwe Tews
  * @author Rodney Rehm
  */
-class Smarty_Internal_Resource_PHP extends Smarty_Resource_Uncompiled {
+class Smarty_Internal_Resource_PHP extends Smarty_Resource_Uncompiled
+{
     /**
      * container for short_open_tag directive's value before executing PHP templates
      * @var string

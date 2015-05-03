@@ -27,49 +27,47 @@
  */
 
 class SQLDumper
-{	
-	public function dumpTablesToFile($dbTables, $filePath)
-	{
-		if($this->canNative('mysqldump'))
-		{
-			return $this->nativeDumpToFile($dbTables, $filePath);
-		}
-		else
-		{
-			return $this->softwareDumpToFile($dbTables, $filePath);
-		}
-	}
-	
-	private function setTimelimit()
-	{
-		@set_time_limit(600); // 10 Minutes
-	}
-		
-	private function canNative($command)
-	{
-		return function_exists('shell_exec') && function_exists('escapeshellarg') && shell_exec($command) !== NULL;
-	}
-	
-	private function nativeDumpToFile($dbTables, $filePath)
-	{
-		require 'includes/config.php';
-		$dbTables	= array_map('escapeshellarg', $dbTables);
-		$sqlDump	= shell_exec("mysqldump --host='".escapeshellarg($database['host'])."' --port=".((int) $database['port'])." --user='".escapeshellarg($database['user'])."' --password='".escapeshellarg($database['userpw'])."' --no-create-db --order-by-primary --add-drop-table --comments --complete-insert --hex-blob '".escapeshellarg($database['databasename'])."' ".implode(' ', $dbTables)." 2>&1 1> ".$filePath);
-		if(strlen($sqlDump) !== 0) #mysqldump error
-		{
-			throw new Exception($sqlDump);
-		}
-	}
-	
-	private function softwareDumpToFile($dbTables, $filePath)
-	{
-		$this->setTimelimit();
-		require 'includes/config.php';
-		$intergerTypes	= array('tinyint', 'smallint', 'mediumint', 'int', 'bigint', 'decimal', 'float', 'double', 'real');
-		$gameVersion	= Config::get('VERSION');
-		$serverVersion	= $GLOBALS['DATABASE']->getServerVersion();
-		$fp	= fopen($filePath, 'w');
-		fwrite($fp, "-- MySQL dump | 2Moons dumper v{$gameVersion}
+{
+    public function dumpTablesToFile($dbTables, $filePath)
+    {
+        if ($this->canNative('mysqldump')) {
+            return $this->nativeDumpToFile($dbTables, $filePath);
+        } else {
+            return $this->softwareDumpToFile($dbTables, $filePath);
+        }
+    }
+    
+    private function setTimelimit()
+    {
+        @set_time_limit(600); // 10 Minutes
+    }
+        
+    private function canNative($command)
+    {
+        return function_exists('shell_exec') && function_exists('escapeshellarg') && shell_exec($command) !== NULL;
+    }
+    
+    private function nativeDumpToFile($dbTables, $filePath)
+    {
+        require 'includes/config.php';
+        $dbTables    = array_map('escapeshellarg', $dbTables);
+        $sqlDump    = shell_exec("mysqldump --host='".escapeshellarg($database['host'])."' --port=".((int) $database['port'])." --user='".escapeshellarg($database['user'])."' --password='".escapeshellarg($database['userpw'])."' --no-create-db --order-by-primary --add-drop-table --comments --complete-insert --hex-blob '".escapeshellarg($database['databasename'])."' ".implode(' ', $dbTables)." 2>&1 1> ".$filePath);
+        if (strlen($sqlDump) !== 0) {
+            #mysqldump error
+
+            throw new Exception($sqlDump);
+        }
+    }
+    
+    private function softwareDumpToFile($dbTables, $filePath)
+    {
+        $this->setTimelimit();
+        require 'includes/config.php';
+        $intergerTypes    = array('tinyint', 'smallint', 'mediumint', 'int', 'bigint', 'decimal', 'float', 'double', 'real');
+        $gameVersion    = Config::get('VERSION');
+        $serverVersion    = $GLOBALS['DATABASE']->getServerVersion();
+        $fp    = fopen($filePath, 'w');
+        fwrite($fp, "-- MySQL dump | 2Moons dumper v{$gameVersion}
 --
 -- Host: {$database['host']}    Database: {$database['databasename']}
 -- ------------------------------------------------------
@@ -88,13 +86,12 @@ class SQLDumper
 
 ");
 
-		foreach($dbTables as $dbTable)
-		{
-			$columNames	= array();
-			$numColums	= array();
-			$firstRow	= true;
-			
-			fwrite($fp, "--
+        foreach ($dbTables as $dbTable) {
+            $columNames    = array();
+            $numColums    = array();
+            $firstRow    = true;
+            
+            fwrite($fp, "--
 -- Table structure for table `{$dbTable}`
 --
 
@@ -103,23 +100,22 @@ DROP TABLE IF EXISTS `{$dbTable}`;
 /*!40101 SET character_set_client = utf8 */;
 
 ");
-			$createTable	= $GLOBALS['DATABASE']->getFirstRow("SHOW CREATE TABLE ".$dbTable);
-			fwrite($fp, $createTable['Create Table'].';');
-			fwrite($fp, "
+            $createTable    = $GLOBALS['DATABASE']->getFirstRow("SHOW CREATE TABLE ".$dbTable);
+            fwrite($fp, $createTable['Create Table'].';');
+            fwrite($fp, "
 			
 /*!40101 SET character_set_client = @saved_cs_client */;");
-			if($GLOBALS['DATABASE']->getFirstCell("SELECT COUNT(*) FROM ".$dbTable.";") == 0)
-			{
-			fwrite($fp, "
+            if ($GLOBALS['DATABASE']->getFirstCell("SELECT COUNT(*) FROM ".$dbTable.";") == 0) {
+                fwrite($fp, "
 			
 --
 -- No data for table `{$dbTable}`
 --
 
 ");
-				continue;
-			}
-			fwrite($fp, "
+                continue;
+            }
+            fwrite($fp, "
 			
 --
 -- Dumping data for table `{$dbTable}`
@@ -129,71 +125,59 @@ LOCK TABLES `{$dbTable}` WRITE;
 /*!40000 ALTER TABLE `{$dbTable}` DISABLE KEYS */;
 
 ");
-			$columsData	= $GLOBALS['DATABASE']->query("SHOW COLUMNS FROM `".$dbTable."`");
+            $columsData    = $GLOBALS['DATABASE']->query("SHOW COLUMNS FROM `".$dbTable."`");
 
-			$columNames	= array();
-			while($columData = $GLOBALS['DATABASE']->fetchArray($columsData))
-			{
-				$columNames[]	= $columData['Field'];
-				foreach($intergerTypes as $type)
-				{
-					if(strpos($columData['Type'], $type.'(') !== false)
-					{
-						$numColums[]	= $columData['Field'];
-						break;
-					}
-				}
-			}
-			$GLOBALS['DATABASE']->free_result($columsData);
-			
-			
-			$insertInto	= "INSERT INTO `{$dbTable}` (`".implode("`, `", $columNames)."`) VALUES\r\n";
-			
-			fwrite($fp, $insertInto);
-			$i = 0;
-			$tableData	= $GLOBALS['DATABASE']->query("SELECT * FROM ".$dbTable);
-			while($tableRow = $GLOBALS['DATABASE']->fetchArray($tableData))
-			{
-				$rowData = array();
-				$i++;
-				if(($i % 50) === 0)
-				{
-					$firstRow	= true;
-					fwrite($fp, ";\r\n");
-					fwrite($fp, $insertInto);
-				}
-				
-				if(!$firstRow)
-				{
-					fwrite($fp, ",\r\n");
-				}
-				else
-				{
-					$firstRow = false;
-				}
-				
-				foreach($tableRow as $colum => $value)
-				{
-					if(in_array($colum, $numColums))
-					{
-						$rowData[]	= $value === NULL ? 'NULL' : $value;
-					}
-					else
-					{
-						$rowData[]	= $value === NULL ? 'NULL' : "'".$GLOBALS['DATABASE']->escape($value)."'";
-					}
-				}
-				fwrite($fp, "(".implode(", ",$rowData).")");
-			}
-			$GLOBALS['DATABASE']->free_result($tableData);
-			fwrite($fp, ";
+            $columNames    = array();
+            while ($columData = $GLOBALS['DATABASE']->fetchArray($columsData)) {
+                $columNames[]    = $columData['Field'];
+                foreach ($intergerTypes as $type) {
+                    if (strpos($columData['Type'], $type.'(') !== false) {
+                        $numColums[]    = $columData['Field'];
+                        break;
+                    }
+                }
+            }
+            $GLOBALS['DATABASE']->free_result($columsData);
+            
+            
+            $insertInto    = "INSERT INTO `{$dbTable}` (`".implode("`, `", $columNames)."`) VALUES\r\n";
+            
+            fwrite($fp, $insertInto);
+            $i = 0;
+            $tableData    = $GLOBALS['DATABASE']->query("SELECT * FROM ".$dbTable);
+            while ($tableRow = $GLOBALS['DATABASE']->fetchArray($tableData)) {
+                $rowData = array();
+                $i++;
+                if (($i % 50) === 0) {
+                    $firstRow    = true;
+                    fwrite($fp, ";\r\n");
+                    fwrite($fp, $insertInto);
+                }
+                
+                if (!$firstRow) {
+                    fwrite($fp, ",\r\n");
+                } else {
+                    $firstRow = false;
+                }
+                
+                foreach ($tableRow as $colum => $value) {
+                    if (in_array($colum, $numColums)) {
+                        $rowData[]    = $value === NULL ? 'NULL' : $value;
+                    } else {
+                        $rowData[]    = $value === NULL ? 'NULL' : "'".$GLOBALS['DATABASE']->escape($value)."'";
+                    }
+                }
+                fwrite($fp, "(".implode(", ",$rowData).")");
+            }
+            $GLOBALS['DATABASE']->free_result($tableData);
+            fwrite($fp, ";
 			
 /*!40000 ALTER TABLE `{$dbTable}` ENABLE KEYS */;
 UNLOCK TABLES;
 
 ");
-		}
-		fwrite($fp, "/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+        }
+        fwrite($fp, "/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
@@ -204,30 +188,26 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on ".date("Y-d-m H:i:s"));
-		fclose($fp);
-	}
-	
-	public function restoreDatabase($filePath)
-	{
-		// Ugly.
-		$this->setTimelimit();
-		
-		if($this->canNative('mysql'))
-		{
-		
-			$sqlDump	= shell_exec("mysql --host='".escapeshellarg($database['host'])."' --port=".((int) $database['port'])." --user='".escapeshellarg($database['user'])."' --password='".escapeshellarg($database['userpw'])."' '".escapeshellarg($database['databasename'])."' < ".escapeshellarg($filePath)." 2>&1 1> /dev/null");
-			if(strlen($sqlDump) !== 0) #mysql error
-			{
-				throw new Exception($sqlDump);
-			}
-		}
-		else
-		{
-			$backupQuery	= explode(";\r\n", file_get_contents($filePath));
-			foreach($backupQuery as $query)
-			{
-				$GLOBALS['DATABASE']->multi_query($query);
-			}
-		}
-	}
+        fclose($fp);
+    }
+    
+    public function restoreDatabase($filePath)
+    {
+        // Ugly.
+        $this->setTimelimit();
+        
+        if ($this->canNative('mysql')) {
+            $sqlDump    = shell_exec("mysql --host='".escapeshellarg($database['host'])."' --port=".((int) $database['port'])." --user='".escapeshellarg($database['user'])."' --password='".escapeshellarg($database['userpw'])."' '".escapeshellarg($database['databasename'])."' < ".escapeshellarg($filePath)." 2>&1 1> /dev/null");
+            if (strlen($sqlDump) !== 0) {
+                #mysql error
+
+                throw new Exception($sqlDump);
+            }
+        } else {
+            $backupQuery    = explode(";\r\n", file_get_contents($filePath));
+            foreach ($backupQuery as $query) {
+                $GLOBALS['DATABASE']->multi_query($query);
+            }
+        }
+    }
 }

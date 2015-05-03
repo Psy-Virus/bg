@@ -26,64 +26,67 @@
  * @link http://2moons.cc/
  */
 
-if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) throw new Exception("Permission error!");
+if (!allowedTo(str_replace(array(dirname(__FILE__), '\\', '/', '.php'), '', __FILE__))) {
+    throw new Exception("Permission error!");
+}
 
 function ShowInformationPage()
 {
-	global $LNG, $CONF, $USER;
+    global $LNG, $CONF, $USER;
 
-	if(file_exists(ini_get('error_log')))
-		$Lines	= count(file(ini_get('error_log')));
-	else
-		$Lines	= 0;
-	
-	try {
-		$dateTimeZoneServer = new DateTimeZone(Config::get('timezone'));
-	} catch (Exception $e) {
-		$dateTimeZoneServer	= new DateTimeZone(date_default_timezone_get());
-	}
-	
-	try {
-		$dateTimeZoneUser	= new DateTimeZone($USER['timezone']);
-	} catch (Exception $e) {
-		$dateTimeZoneUser	= new DateTimeZone(date_default_timezone_get());
-	}
-	
-	try {
-		$dateTimeZonePHP	= new DateTimeZone(ini_get('date.timezone'));
-	} catch (Exception $e) {
-		$dateTimeZonePHP	= new DateTimeZone(date_default_timezone_get());
-	}
-	
-	$dateTimeServer		= new DateTime("now", $dateTimeZoneServer);
-	$dateTimeUser		= new DateTime("now", $dateTimeZoneUser);
-	$dateTimePHP		= new DateTime("now", $dateTimeZonePHP);
-	
-	$template	= new template();
-	$template->assign_vars(array(
-		'info_information'	=> sprintf($LNG['info_information'], 'http://tracker.2moons.cc/'),
-		'info'				=> $_SERVER['SERVER_SOFTWARE'],
-		'vPHP'				=> PHP_VERSION,
-		'vAPI'				=> PHP_SAPI,
-		'vGame'				=> Config::get('VERSION'),
-		'vMySQLc'			=> $GLOBALS['DATABASE']->getVersion(),
-		'vMySQLs'			=> $GLOBALS['DATABASE']->getServerVersion(),
-		'root'				=> $_SERVER['SERVER_NAME'],
-		'gameroot'			=> $_SERVER['SERVER_NAME'].str_replace('/admin.php', '', $_SERVER['PHP_SELF']),
-		'json'				=> function_exists('json_encode') ? 'Ja' : 'Nein',
-		'bcmath'			=> extension_loaded('bcmath') ? 'Ja' : 'Nein',
-		'curl'				=> extension_loaded('curl') ? 'Ja' : 'Nein',
-		'browser'			=> $_SERVER['HTTP_USER_AGENT'],
-		'safemode'			=> ini_get('safe_mode') ? 'Ja' : 'Nein',
-		'memory'			=> ini_get('memory_limit'),
-		'suhosin'			=> ini_get('suhosin.request.max_value_length') ? 'Ja' : 'Nein',
-		'log_errors'		=> ini_get('log_errors') ? 'Aktiv' : 'Inaktiv',
-		'errorlog'			=> ini_get('error_log'),
-		'errorloglines'		=> $Lines,
-		'php_tz'			=> $dateTimePHP->getOffset() / 3600,
-		'conf_tz'			=> $dateTimeServer->getOffset() / 3600,
-		'user_tz'			=> $dateTimeUser->getOffset() / 3600,
-	));
+    if (file_exists(ini_get('error_log'))) {
+        $Lines    = count(file(ini_get('error_log')));
+    } else {
+        $Lines    = 0;
+    }
+    
+    try {
+        $dateTimeZoneServer = new DateTimeZone(Config::get('timezone'));
+    } catch (Exception $e) {
+        $dateTimeZoneServer    = new DateTimeZone(date_default_timezone_get());
+    }
+    
+    try {
+        $dateTimeZoneUser    = new DateTimeZone($USER['timezone']);
+    } catch (Exception $e) {
+        $dateTimeZoneUser    = new DateTimeZone(date_default_timezone_get());
+    }
+    
+    try {
+        $dateTimeZonePHP    = new DateTimeZone(ini_get('date.timezone'));
+    } catch (Exception $e) {
+        $dateTimeZonePHP    = new DateTimeZone(date_default_timezone_get());
+    }
+    
+    $dateTimeServer        = new DateTime("now", $dateTimeZoneServer);
+    $dateTimeUser        = new DateTime("now", $dateTimeZoneUser);
+    $dateTimePHP        = new DateTime("now", $dateTimeZonePHP);
+    
+    $template    = new template();
+    $template->assign_vars(array(
+        'info_information'    => sprintf($LNG['info_information'], 'http://tracker.2moons.cc/'),
+        'info'                => $_SERVER['SERVER_SOFTWARE'],
+        'vPHP'                => PHP_VERSION,
+        'vAPI'                => PHP_SAPI,
+        'vGame'                => Config::get('VERSION'),
+        'vMySQLc'            => $GLOBALS['DATABASE']->getVersion(),
+        'vMySQLs'            => $GLOBALS['DATABASE']->getServerVersion(),
+        'root'                => $_SERVER['SERVER_NAME'],
+        'gameroot'            => $_SERVER['SERVER_NAME'].str_replace('/admin.php', '', $_SERVER['PHP_SELF']),
+        'json'                => function_exists('json_encode') ? 'Ja' : 'Nein',
+        'bcmath'            => extension_loaded('bcmath') ? 'Ja' : 'Nein',
+        'curl'                => extension_loaded('curl') ? 'Ja' : 'Nein',
+        'browser'            => $_SERVER['HTTP_USER_AGENT'],
+        'safemode'            => ini_get('safe_mode') ? 'Ja' : 'Nein',
+        'memory'            => ini_get('memory_limit'),
+        'suhosin'            => ini_get('suhosin.request.max_value_length') ? 'Ja' : 'Nein',
+        'log_errors'        => ini_get('log_errors') ? 'Aktiv' : 'Inaktiv',
+        'errorlog'            => ini_get('error_log'),
+        'errorloglines'        => $Lines,
+        'php_tz'            => $dateTimePHP->getOffset() / 3600,
+        'conf_tz'            => $dateTimeServer->getOffset() / 3600,
+        'user_tz'            => $dateTimeUser->getOffset() / 3600,
+    ));
 
-	$template->show('ShowInformationPage.tpl');
+    $template->show('ShowInformationPage.tpl');
 }

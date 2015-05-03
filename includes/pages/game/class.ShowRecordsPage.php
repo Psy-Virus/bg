@@ -31,43 +31,42 @@ class ShowRecordsPage extends AbstractPage
 {
     public static $requireModule = MODULE_RECORDS;
 
-	function __construct() 
-	{
-		parent::__construct();
-	}
-	
-	function show()
-	{
-		global $USER, $PLANET, $LNG, $resource, $CONF, $UNI, $reslist;
+    public function __construct()
+    {
+        parent::__construct();
+    }
+    
+    public function show()
+    {
+        global $USER, $PLANET, $LNG, $resource, $CONF, $UNI, $reslist;
 
-		$recordResult	= $GLOBALS['DATABASE']->query("SELECT elementID, level, userID, username FROM ".USERS." INNER JOIN ".RECORDS." ON userID = id WHERE universe = ".$UNI.";");
-		
-		$defenseList	= array_fill_keys($reslist['defense'], array());
-		$fleetList		= array_fill_keys($reslist['fleet'], array());
-		$researchList	= array_fill_keys($reslist['tech'], array());
-		$buildList		= array_fill_keys($reslist['build'], array());
-		
-		while($recordRow = $GLOBALS['DATABASE']->fetch_array($recordResult)) {
-			if (in_array($recordRow['elementID'], $reslist['defense'])) {
-				$defenseList[$recordRow['elementID']][]		= $recordRow;
-			} elseif (in_array($recordRow['elementID'], $reslist['fleet'])) {
-				$fleetList[$recordRow['elementID']][]		= $recordRow;
-			} elseif (in_array($recordRow['elementID'], $reslist['tech'])) {
-				$researchList[$recordRow['elementID']][]	= $recordRow;
-			} elseif (in_array($recordRow['elementID'], $reslist['build'])) {
-				$buildList[$recordRow['elementID']][]		= $recordRow;
-			}
-		}
-		
-		$this->tplObj->assign_vars(array(	
-			'defenseList'	=> $defenseList,
-			'fleetList'		=> $fleetList,
-			'researchList'	=> $researchList,
-			'buildList'		=> $buildList,
-			'update'		=> _date($LNG['php_tdformat'], Config::get('stat_last_update'), $USER['timezone']),
-		));
-		
-		$this->display('page.records.default.tpl');
-	}
+        $recordResult    = $GLOBALS['DATABASE']->query("SELECT elementID, level, userID, username FROM ".USERS." INNER JOIN ".RECORDS." ON userID = id WHERE universe = ".$UNI.";");
+        
+        $defenseList    = array_fill_keys($reslist['defense'], array());
+        $fleetList        = array_fill_keys($reslist['fleet'], array());
+        $researchList    = array_fill_keys($reslist['tech'], array());
+        $buildList        = array_fill_keys($reslist['build'], array());
+        
+        while ($recordRow = $GLOBALS['DATABASE']->fetch_array($recordResult)) {
+            if (in_array($recordRow['elementID'], $reslist['defense'])) {
+                $defenseList[$recordRow['elementID']][]        = $recordRow;
+            } elseif (in_array($recordRow['elementID'], $reslist['fleet'])) {
+                $fleetList[$recordRow['elementID']][]        = $recordRow;
+            } elseif (in_array($recordRow['elementID'], $reslist['tech'])) {
+                $researchList[$recordRow['elementID']][]    = $recordRow;
+            } elseif (in_array($recordRow['elementID'], $reslist['build'])) {
+                $buildList[$recordRow['elementID']][]        = $recordRow;
+            }
+        }
+        
+        $this->tplObj->assign_vars(array(
+            'defenseList'    => $defenseList,
+            'fleetList'        => $fleetList,
+            'researchList'    => $researchList,
+            'buildList'        => $buildList,
+            'update'        => _date($LNG['php_tdformat'], Config::get('stat_last_update'), $USER['timezone']),
+        ));
+        
+        $this->display('page.records.default.tpl');
+    }
 }
- 

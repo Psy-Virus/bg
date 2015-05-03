@@ -28,22 +28,23 @@
 
 class ShowBattleHallPage extends AbstractPage
 {
-	public static $requireModule = MODULE_BATTLEHALL;
-	
-	function __construct() {
-		parent::__construct();
-	}
-	
-	function show()
-	{
-		global $USER, $PLANET, $LNG, $UNI;
-		$mode = HTTP::_GP('mode','');
-		$order = HTTP::_GP('order', 'units');
-		$sort = HTTP::_GP('sort', 'desc');
-		$sort = strtoupper($sort);
-		
-		$GLOBALS['DATABASE']->query("SET @rank:=0;");
-		$top = $GLOBALS['DATABASE']->query("SELECT *, (
+    public static $requireModule = MODULE_BATTLEHALL;
+    
+    public function __construct()
+    {
+        parent::__construct();
+    }
+    
+    public function show()
+    {
+        global $USER, $PLANET, $LNG, $UNI;
+        $mode = HTTP::_GP('mode','');
+        $order = HTTP::_GP('order', 'units');
+        $sort = HTTP::_GP('sort', 'desc');
+        $sort = strtoupper($sort);
+        
+        $GLOBALS['DATABASE']->query("SET @rank:=0;");
+        $top = $GLOBALS['DATABASE']->query("SELECT *, (
 			SELECT DISTINCT
 			IF(".TOPKB_USERS.".username = '', GROUP_CONCAT(".USERS.".username SEPARATOR ' & '), GROUP_CONCAT(".TOPKB_USERS.".username SEPARATOR ' & '))
 			FROM ".TOPKB_USERS."
@@ -55,58 +56,53 @@ class ShowBattleHallPage extends AbstractPage
 			IF(".TOPKB_USERS.".username = '', GROUP_CONCAT(".USERS.".username SEPARATOR ' & '), GROUP_CONCAT(".TOPKB_USERS.".username SEPARATOR ' & '))
 			FROM ".TOPKB_USERS." INNER JOIN ".USERS." ON uid = id
 			WHERE ".TOPKB_USERS.".`rid` = ".TOPKB.".`rid` AND `role` = 2
-		) as `defender`  
+		) as `defender`
 		,@rank:=@rank+1 as rank
 		FROM ".TOPKB." WHERE `universe` = '".$UNI."' ORDER BY units DESC LIMIT 100;");
-		
-		$TopKBList	= array();
-		$i = 1;
-		while($data = $GLOBALS['DATABASE']->fetch_array($top))
-		{
-			switch($order)
-			{
-				case 'date':
-					$key = $data['time'];
-				break;
-				case 'owner':
-					$key = $data['attacker'].$data['defender'];
-				break;
-				case 'units':
-				default:
-					$key = $data['units'];
-				break;
-			}
-			
-			$TopKBList[$key][$data['rank']]	= array(
-				'result'	=> $data['result'],
-				'date'		=> _date($LNG['php_tdformat'], $data['time'], $USER['timezone']),
-				'time'		=> TIMESTAMP - $data['time'],
-				'units'		=> $data['units'],
-				'rid'		=> $data['rid'],
-				'attacker'	=> $data['attacker'],
-				'defender'	=> $data['defender'],
-			);
-		}
-		
-		$GLOBALS['DATABASE']->free_result($top);
-		
-		ksort($TopKBList);
+        
+        $TopKBList    = array();
+        $i = 1;
+        while ($data = $GLOBALS['DATABASE']->fetch_array($top)) {
+            switch ($order) {
+                case 'date':
+                    $key = $data['time'];
+                break;
+                case 'owner':
+                    $key = $data['attacker'].$data['defender'];
+                break;
+                case 'units':
+                default:
+                    $key = $data['units'];
+                break;
+            }
+            
+            $TopKBList[$key][$data['rank']]    = array(
+                'result'    => $data['result'],
+                'date'        => _date($LNG['php_tdformat'], $data['time'], $USER['timezone']),
+                'time'        => TIMESTAMP - $data['time'],
+                'units'        => $data['units'],
+                'rid'        => $data['rid'],
+                'attacker'    => $data['attacker'],
+                'defender'    => $data['defender'],
+            );
+        }
+        
+        $GLOBALS['DATABASE']->free_result($top);
+        
+        ksort($TopKBList);
 
-		if($sort === "DESC")
-		{
-			$TopKBList	= array_reverse($TopKBList);
-		}
-		else
-		{	
-			$sort = "ASC";
-		}
+        if ($sort === "DESC") {
+            $TopKBList    = array_reverse($TopKBList);
+        } else {
+            $sort = "ASC";
+        }
 
-		$this->tplObj->assign_vars(array(
-			'TopKBList'		=> $TopKBList,
-			'sort'			=> $sort,
-			'order'			=> $order,
-		));
-		
-		$this->display('page.battlehall.default.tpl');
-	}
+        $this->tplObj->assign_vars(array(
+            'TopKBList'        => $TopKBList,
+            'sort'            => $sort,
+            'order'            => $order,
+        ));
+        
+        $this->display('page.battlehall.default.tpl');
+    }
 }

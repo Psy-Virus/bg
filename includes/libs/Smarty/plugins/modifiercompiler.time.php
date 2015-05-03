@@ -19,7 +19,7 @@
 
 function smarty_modifiercompiler_time($params, $compiler)
 {
-	return 'pretty_time(' . $params[0] . ')';
+    return 'pretty_time(' . $params[0] . ')';
 }
 
 ?>

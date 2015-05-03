@@ -15,7 +15,8 @@
  * @package Smarty
  * @subpackage Compiler
  */
-class Smarty_Internal_Compile_Assign extends Smarty_Internal_CompileBase {
+class Smarty_Internal_Compile_Assign extends Smarty_Internal_CompileBase
+{
 
     /**
      * Compiles code for the {assign} tag
@@ -82,7 +83,6 @@ class Smarty_Internal_Compile_Assign extends Smarty_Internal_CompileBase {
         $output .= '?>';
         return $output;
     }
-
 }
 
 ?>

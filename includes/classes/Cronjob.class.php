@@ -28,72 +28,66 @@
 
 class Cronjob
 {
-	function __construct()
-	{
-		
-	}
-	
-	static function execute($cronjobID)
-	{
-		$cronjobsList		= array();
-		$cronjobsClassName	= $GLOBALS['DATABASE']->getFirstCell("SELECT class FROM ".CRONJOBS." WHERE isActive = 1 AND cronjobID = ".$cronjobID." AND `lock` IS NULL;");
-		if(empty($cronjobsClassName))
-		{
-			throw new Exception("Unkown cronjob ".$cronjobID." or is deactived");
-		}
-		
-		$GLOBALS['DATABASE']->query("UPDATE ".CRONJOBS." SET `lock` = '".md5(TIMESTAMP)."' WHERE cronjobID = ".$cronjobID.";");
-		
-		$cronjobsPath		= 'includes/classes/cronjob/'.$cronjobsClassName.'.class.php';
-		
-		// die hard, if file not exists.
-		require_once($cronjobsPath);
-		
-		$cronjobObj			= new $cronjobsClassName;
-		$cronjobObj->run();
-		self::reCalculateCronjobs($cronjobID);
-		$GLOBALS['DATABASE']->query("UPDATE ".CRONJOBS." SET `lock` = NULL WHERE cronjobID = ".$cronjobID.";");	
-	}
-	
-	static function getNeedTodoExecutedJobs()
-	{
-		$cronjobsList	= array();
-		$cronjobsRaw	= $GLOBALS['DATABASE']->query("SELECT cronjobID FROM ".CRONJOBS." WHERE isActive = 1 AND nextTime < ".TIMESTAMP." AND `lock` IS NULL;");
-		while($cronjobRow = $GLOBALS['DATABASE']->fetchArray($cronjobsRaw))
-		{
-			$cronjobsList[]	= $cronjobRow['cronjobID'];
-		}
-		
-		$GLOBALS['DATABASE']->free_result($cronjobsRaw);
-		
-		return $cronjobsList;
-	}
-	
-	static function reCalculateCronjobs($cronjobID = NULL)
-	{
-	
-		require_once 'includes/libs/tdcron/class.tdcron.php';
-		require_once 'includes/libs/tdcron/class.tdcron.entry.php';
-		
-		$cronjobsList	= array();
-		$SQL			= "";
-		$where			= "";
-		
-		if(!empty($cronjobID))
-		{
-			$where	= " WHERE cronjobID = ".$cronjobID;
-		}
-		
-		$cronjobsRaw	= $GLOBALS['DATABASE']->query("SELECT cronjobID, min, hours, dom, month, dow FROM ".CRONJOBS.$where.";");
+    public function __construct()
+    {
+    }
+    
+    public static function execute($cronjobID)
+    {
+        $cronjobsList        = array();
+        $cronjobsClassName    = $GLOBALS['DATABASE']->getFirstCell("SELECT class FROM ".CRONJOBS." WHERE isActive = 1 AND cronjobID = ".$cronjobID." AND `lock` IS NULL;");
+        if (empty($cronjobsClassName)) {
+            throw new Exception("Unkown cronjob ".$cronjobID." or is deactived");
+        }
+        
+        $GLOBALS['DATABASE']->query("UPDATE ".CRONJOBS." SET `lock` = '".md5(TIMESTAMP)."' WHERE cronjobID = ".$cronjobID.";");
+        
+        $cronjobsPath        = 'includes/classes/cronjob/'.$cronjobsClassName.'.class.php';
+        
+        // die hard, if file not exists.
+        require_once($cronjobsPath);
+        
+        $cronjobObj            = new $cronjobsClassName;
+        $cronjobObj->run();
+        self::reCalculateCronjobs($cronjobID);
+        $GLOBALS['DATABASE']->query("UPDATE ".CRONJOBS." SET `lock` = NULL WHERE cronjobID = ".$cronjobID.";");
+    }
+    
+    public static function getNeedTodoExecutedJobs()
+    {
+        $cronjobsList    = array();
+        $cronjobsRaw    = $GLOBALS['DATABASE']->query("SELECT cronjobID FROM ".CRONJOBS." WHERE isActive = 1 AND nextTime < ".TIMESTAMP." AND `lock` IS NULL;");
+        while ($cronjobRow = $GLOBALS['DATABASE']->fetchArray($cronjobsRaw)) {
+            $cronjobsList[]    = $cronjobRow['cronjobID'];
+        }
+        
+        $GLOBALS['DATABASE']->free_result($cronjobsRaw);
+        
+        return $cronjobsList;
+    }
+    
+    public static function reCalculateCronjobs($cronjobID = NULL)
+    {
+        require_once 'includes/libs/tdcron/class.tdcron.php';
+        require_once 'includes/libs/tdcron/class.tdcron.entry.php';
+        
+        $cronjobsList    = array();
+        $SQL            = "";
+        $where            = "";
+        
+        if (!empty($cronjobID)) {
+            $where    = " WHERE cronjobID = ".$cronjobID;
+        }
+        
+        $cronjobsRaw    = $GLOBALS['DATABASE']->query("SELECT cronjobID, min, hours, dom, month, dow FROM ".CRONJOBS.$where.";");
 
-		while($cronjobRow = $GLOBALS['DATABASE']->fetchArray($cronjobsRaw))
-		{
-			$cronTabString	= implode(' ', array($cronjobRow['min'], $cronjobRow['hours'], $cronjobRow['dom'], $cronjobRow['month'], $cronjobRow['dow']));
-			$nextTime		= tdCron::getNextOccurrence($cronTabString, TIMESTAMP);
-			
-			$SQL			.= "UPDATE ".CRONJOBS." SET nextTime = ".$nextTime." WHERE cronjobID = ".$cronjobRow['cronjobID'].";";
-		}
-		
-		$GLOBALS['DATABASE']->multi_query($SQL);
-	}
+        while ($cronjobRow = $GLOBALS['DATABASE']->fetchArray($cronjobsRaw)) {
+            $cronTabString    = implode(' ', array($cronjobRow['min'], $cronjobRow['hours'], $cronjobRow['dom'], $cronjobRow['month'], $cronjobRow['dow']));
+            $nextTime        = tdCron::getNextOccurrence($cronTabString, TIMESTAMP);
+            
+            $SQL            .= "UPDATE ".CRONJOBS." SET nextTime = ".$nextTime." WHERE cronjobID = ".$cronjobRow['cronjobID'].";";
+        }
+        
+        $GLOBALS['DATABASE']->multi_query($SQL);
+    }
 }

@@ -29,101 +29,97 @@
  
 class ShowNotesPage extends AbstractPage
 {
-	public static $requireModule = MODULE_NOTICE;
+    public static $requireModule = MODULE_NOTICE;
 
-	function __construct() 
-	{
-		parent::__construct();
-		$this->setWindow('popup');
-		$this->initTemplate();
-	}
-	
-	function show()
-	{
-		global $LNG, $USER;
-		
-		$notesResult 	= $GLOBALS['DATABASE']->query("SELECT * FROM ".NOTES." WHERE owner = ".$USER['id']." ORDER BY priority DESC, time DESC;");
-		$notesList		= array();
-		
-		while($notesRow = $GLOBALS['DATABASE']->fetch_array($notesResult))
-		{
-			$notesList[$notesRow['id']]	= array(
-				'time'		=> _date($LNG['php_tdformat'], $notesRow['time'], $USER['timezone']),
-				'title'		=> $notesRow['title'],
-				'size'		=> strlen($notesRow['text']),
-				'priority'	=> $notesRow['priority'],
-			);
-		}
-		
-		$GLOBALS['DATABASE']->free_result($notesResult);
-		
-		$this->tplObj->assign_vars(array(
-			'notesList'	=> $notesList,
-		));
-		
-		$this->display('page.notes.default.tpl');
-	}
-	
-	function detail()
-	{
-		global $LNG, $USER;
+    public function __construct()
+    {
+        parent::__construct();
+        $this->setWindow('popup');
+        $this->initTemplate();
+    }
+    
+    public function show()
+    {
+        global $LNG, $USER;
+        
+        $notesResult    = $GLOBALS['DATABASE']->query("SELECT * FROM ".NOTES." WHERE owner = ".$USER['id']." ORDER BY priority DESC, time DESC;");
+        $notesList        = array();
+        
+        while ($notesRow = $GLOBALS['DATABASE']->fetch_array($notesResult)) {
+            $notesList[$notesRow['id']]    = array(
+                'time'        => _date($LNG['php_tdformat'], $notesRow['time'], $USER['timezone']),
+                'title'        => $notesRow['title'],
+                'size'        => strlen($notesRow['text']),
+                'priority'    => $notesRow['priority'],
+            );
+        }
+        
+        $GLOBALS['DATABASE']->free_result($notesResult);
+        
+        $this->tplObj->assign_vars(array(
+            'notesList'    => $notesList,
+        ));
+        
+        $this->display('page.notes.default.tpl');
+    }
+    
+    public function detail()
+    {
+        global $LNG, $USER;
 
-		$noteID		= HTTP::_GP('id', 0);
-		
-		if(!empty($noteID)) {
-			$noteDetail	= $GLOBALS['DATABASE']->getFirstRow("SELECT * FROM ".NOTES." WHERE id = ".$noteID." AND owner = ".$USER['id'].";");
-		} else {
-			$noteDetail	= array(
-				'id'		=> 0,
-				'priority'	=> 1,
-				'text'		=> '',
-				'title'		=> ''
-			);
-		}
-		
-		$this->tplObj->execscript("$('#cntChars').text($('#text').val().length);");
-		$this->tplObj->assign_vars(array(
-			'PriorityList'	=> array(2 => $LNG['nt_important'], 1 => $LNG['nt_normal'], 0 => $LNG['nt_unimportant']),
-			'noteDetail'	=> $noteDetail,
-		));
-		
-		$this->display('page.notes.detail.tpl');
-	}
-	
-	public function insert()
-	{
-		global $LNG, $USER, $UNI;
-		$priority 	= HTTP::_GP('priority', 1);
-		$title 		= HTTP::_GP('title', '', true);
-		$text 		= HTTP::_GP('text', '', true);
-		$id			= HTTP::_GP('id', 0);	
-		$title 		= !empty($title) ? $title : $LNG['nt_no_title'];
-		$text 		= !empty($text) ? $text : $LNG['nt_no_text'];
-		
-		if($id == 0) {
-			$SQL	= "INSERT INTO ".NOTES." SET owner = ".$USER['id'].", time = ".TIMESTAMP.", priority = ".$priority.", title = '".$GLOBALS['DATABASE']->sql_escape($title)."', text = '".$GLOBALS['DATABASE']->sql_escape($text)."', universe = ".$UNI.";";		
-		} else {
-			$SQL	= "UPDATE ".NOTES." SET time = ".TIMESTAMP.", priority = ".$priority.", title = '".$GLOBALS['DATABASE']->sql_escape($title)."', text = '".$GLOBALS['DATABASE']->sql_escape($text)."' WHERE id = ".$id.";";
-		}
-		
-		$GLOBALS['DATABASE']->query($SQL);
-		$this->redirectTo('game.php?page=notes');
-	}
-	
-	function delete()
-	{
-		global $USER;
-		if(isset($_POST['delmes']) && is_array($_POST['delmes']))
-		{
-			$SQLWhere = array();
-			foreach($_POST['delmes'] as $id => $b)
-			{
-				$SQLWhere[] = "id = '".(int) $id."'";
-			}
-			
-			$GLOBALS['DATABASE']->query("DELETE FROM ".NOTES." WHERE (".implode(" OR ",$SQLWhere).") AND owner = '".$USER['id']."';");
-		}
-		$this->redirectTo('game.php?page=notes');
-	}
-
+        $noteID        = HTTP::_GP('id', 0);
+        
+        if (!empty($noteID)) {
+            $noteDetail    = $GLOBALS['DATABASE']->getFirstRow("SELECT * FROM ".NOTES." WHERE id = ".$noteID." AND owner = ".$USER['id'].";");
+        } else {
+            $noteDetail    = array(
+                'id'        => 0,
+                'priority'    => 1,
+                'text'        => '',
+                'title'        => ''
+            );
+        }
+        
+        $this->tplObj->execscript("$('#cntChars').text($('#text').val().length);");
+        $this->tplObj->assign_vars(array(
+            'PriorityList'    => array(2 => $LNG['nt_important'], 1 => $LNG['nt_normal'], 0 => $LNG['nt_unimportant']),
+            'noteDetail'    => $noteDetail,
+        ));
+        
+        $this->display('page.notes.detail.tpl');
+    }
+    
+    public function insert()
+    {
+        global $LNG, $USER, $UNI;
+        $priority    = HTTP::_GP('priority', 1);
+        $title        = HTTP::_GP('title', '', true);
+        $text        = HTTP::_GP('text', '', true);
+        $id            = HTTP::_GP('id', 0);
+        $title        = !empty($title) ? $title : $LNG['nt_no_title'];
+        $text        = !empty($text) ? $text : $LNG['nt_no_text'];
+        
+        if ($id == 0) {
+            $SQL    = "INSERT INTO ".NOTES." SET owner = ".$USER['id'].", time = ".TIMESTAMP.", priority = ".$priority.", title = '".$GLOBALS['DATABASE']->sql_escape($title)."', text = '".$GLOBALS['DATABASE']->sql_escape($text)."', universe = ".$UNI.";";
+        } else {
+            $SQL    = "UPDATE ".NOTES." SET time = ".TIMESTAMP.", priority = ".$priority.", title = '".$GLOBALS['DATABASE']->sql_escape($title)."', text = '".$GLOBALS['DATABASE']->sql_escape($text)."' WHERE id = ".$id.";";
+        }
+        
+        $GLOBALS['DATABASE']->query($SQL);
+        $this->redirectTo('game.php?page=notes');
+    }
+    
+    public function delete()
+    {
+        global $USER;
+        if (isset($_POST['delmes']) && is_array($_POST['delmes'])) {
+            $SQLWhere = array();
+            foreach ($_POST['delmes'] as $id => $b) {
+                $SQLWhere[] = "id = '".(int) $id."'";
+            }
+            
+            $GLOBALS['DATABASE']->query("DELETE FROM ".NOTES." WHERE (".implode(" OR ",$SQLWhere).") AND owner = '".$USER['id']."';");
+        }
+        $this->redirectTo('game.php?page=notes');
+    }
 }

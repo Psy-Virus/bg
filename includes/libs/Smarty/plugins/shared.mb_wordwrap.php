@@ -6,7 +6,7 @@
  * @subpackage PluginsShared
  */
 
-if(!function_exists('smarty_mb_wordwrap')) {
+if (!function_exists('smarty_mb_wordwrap')) {
 
     /**
      * Wrap a string to a given number of characters
@@ -63,13 +63,15 @@ if(!function_exists('smarty_mb_wordwrap')) {
                         $length = 0;
                         continue;
                     }
-                } else if ($token == "\n") {
-                    // hard break must reset counters
-                    $_previous = 0;
-                    $length = 0;
                 } else {
-                    // remember if we had a space or not
+                    if ($token == "\n") {
+                        // hard break must reset counters
+                    $_previous = 0;
+                        $length = 0;
+                    } else {
+                        // remember if we had a space or not
                     $_previous = $_space;
+                    }
                 }
                 // add the token
                 $t .= $token;
@@ -78,6 +80,5 @@ if(!function_exists('smarty_mb_wordwrap')) {
 
         return $t;
     }
-
 }
 ?>

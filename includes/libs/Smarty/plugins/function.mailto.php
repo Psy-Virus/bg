@@ -71,8 +71,9 @@ function smarty_function_mailto($params, $template)
             case 'cc':
             case 'bcc':
             case 'followupto':
-                if (!empty($value))
+                if (!empty($value)) {
                     $mail_parms[] = $var . '=' . str_replace($search, $replace, rawurlencode($value));
+                }
                 break;
 
             case 'subject':
@@ -110,7 +111,7 @@ function smarty_function_mailto($params, $template)
     } elseif ($encode == 'javascript_charcode') {
         $string = '<a href="mailto:' . $address . '" ' . $extra . '>' . $text . '</a>';
 
-        for($x = 0, $y = strlen($string); $x < $y; $x++) {
+        for ($x = 0, $y = strlen($string); $x < $y; $x++) {
             $ord[] = ord($string[$x]);
         }
 

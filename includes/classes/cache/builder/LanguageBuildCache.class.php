@@ -28,24 +28,27 @@
 
 class LanguageBuildCache
 {
-	function buildCache()
-	{
-		$languages	= array();
-		foreach (new DirectoryIterator(ROOT_PATH.'language/') as $fileInfo)
-		{
-			if(!$fileInfo->isDir()) continue;
-			
-			$Lang	= $fileInfo->getBasename();
-			
-			if(!file_exists(ROOT_PATH.'language/'.$Lang.'/LANG.cfg')) continue;
-				
-			// Fixed BOM problems.
-			ob_start();
-			require 'language/'.$Lang.'/LANG.cfg';
-			ob_end_clean();
-			$languages[$Lang]	= $Language['name'];
-		}
-		
-		return $languages;
-	}
+    public function buildCache()
+    {
+        $languages    = array();
+        foreach (new DirectoryIterator(ROOT_PATH.'language/') as $fileInfo) {
+            if (!$fileInfo->isDir()) {
+                continue;
+            }
+            
+            $Lang    = $fileInfo->getBasename();
+            
+            if (!file_exists(ROOT_PATH.'language/'.$Lang.'/LANG.cfg')) {
+                continue;
+            }
+                
+            // Fixed BOM problems.
+            ob_start();
+            require 'language/'.$Lang.'/LANG.cfg';
+            ob_end_clean();
+            $languages[$Lang]    = $Language['name'];
+        }
+        
+        return $languages;
+    }
 }

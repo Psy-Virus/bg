@@ -29,80 +29,77 @@
 
 class ShowPhalanxPage extends AbstractPage
 {
-	public static $requireModule = MODULE_PHALANX;
-	
-	static function allowPhalanx($toGalaxy, $toSystem)
-	{
-		global $PLANET, $resource;
+    public static $requireModule = MODULE_PHALANX;
+    
+    public static function allowPhalanx($toGalaxy, $toSystem)
+    {
+        global $PLANET, $resource;
 
-		if ($PLANET['galaxy'] != $toGalaxy || $PLANET[$resource[42]] == 0 || !isModulAvalible(MODULE_PHALANX) || $PLANET[$resource[903]] < PHALANX_DEUTERIUM) {
-			return false;
-		}
-		
-		$PhRange	= self::GetPhalanxRange($PLANET[$resource[42]]);
-		$systemMin  = max(1, $PLANET['system'] - $PhRange);
-		$systemMax  = $PLANET['system'] + $PhRange;
-		
-		return $toSystem >= $systemMin && $toSystem <= $systemMax;
-	}
+        if ($PLANET['galaxy'] != $toGalaxy || $PLANET[$resource[42]] == 0 || !isModulAvalible(MODULE_PHALANX) || $PLANET[$resource[903]] < PHALANX_DEUTERIUM) {
+            return false;
+        }
+        
+        $PhRange    = self::GetPhalanxRange($PLANET[$resource[42]]);
+        $systemMin  = max(1, $PLANET['system'] - $PhRange);
+        $systemMax  = $PLANET['system'] + $PhRange;
+        
+        return $toSystem >= $systemMin && $toSystem <= $systemMax;
+    }
 
-	static function GetPhalanxRange($PhalanxLevel)
-	{
-		return ($PhalanxLevel == 1) ? 1 : pow($PhalanxLevel, 2) - 1;
-	}
-	
-	function __construct() {
-		
-	}
-	
-	function show()
-	{
-		global $USER, $PLANET, $LNG, $UNI, $resource;
-		require_once('includes/classes/class.FlyingFleetsTable.php');
-		
-		$FlyingFleetsTable 	= new FlyingFleetsTable();
-		$this->initTemplate();
-		$this->setWindow('popup');
-		$this->tplObj->loadscript('phalanx.js');
-		
-		$Galaxy 			= HTTP::_GP('galaxy', 0);
-		$System 			= HTTP::_GP('system', 0);
-		$Planet 			= HTTP::_GP('planet', 0);
-		
-		if(!$this->allowPhalanx($Galaxy, $System))
-		{
-			$this->printMessage($LNG['px_out_of_range']);
-		}
-		
-		if ($PLANET[$resource[903]] < PHALANX_DEUTERIUM)
-		{
-			$this->printMessage($LNG['px_no_deuterium']);
-		}
+    public static function GetPhalanxRange($PhalanxLevel)
+    {
+        return ($PhalanxLevel == 1) ? 1 : pow($PhalanxLevel, 2) - 1;
+    }
+    
+    public function __construct()
+    {
+    }
+    
+    public function show()
+    {
+        global $USER, $PLANET, $LNG, $UNI, $resource;
+        require_once('includes/classes/class.FlyingFleetsTable.php');
+        
+        $FlyingFleetsTable    = new FlyingFleetsTable();
+        $this->initTemplate();
+        $this->setWindow('popup');
+        $this->tplObj->loadscript('phalanx.js');
+        
+        $Galaxy            = HTTP::_GP('galaxy', 0);
+        $System            = HTTP::_GP('system', 0);
+        $Planet            = HTTP::_GP('planet', 0);
+        
+        if (!$this->allowPhalanx($Galaxy, $System)) {
+            $this->printMessage($LNG['px_out_of_range']);
+        }
+        
+        if ($PLANET[$resource[903]] < PHALANX_DEUTERIUM) {
+            $this->printMessage($LNG['px_no_deuterium']);
+        }
 
-		$GLOBALS['DATABASE']->query("UPDATE ".PLANETS." SET `deuterium` = `deuterium` - ".PHALANX_DEUTERIUM." WHERE `id` = '".$PLANET['id']."';");
-		
-		$TargetInfo = $GLOBALS['DATABASE']->getFirstRow("SELECT id, name, id_owner FROM ".PLANETS." WHERE`universe` = '".$UNI."' AND `galaxy` = '".$Galaxy."' AND `system` = '".$System."' AND `planet` = '".$Planet."' AND `planet_type` = '1';");
-		
-		if(empty($TargetInfo))
-		{
-			$this->printMessage($LNG['px_out_of_range']);
-		}
-		
-		require_once('includes/classes/class.FlyingFleetsTable.php');
-		$fleetTableObj = new FlyingFleetsTable;
-		$fleetTableObj->setPhalanxMode();
-		$fleetTableObj->setUser($TargetInfo['id_owner']);
-		$fleetTableObj->setPlanet($TargetInfo['id']);
-		$fleetTable	=  $fleetTableObj->renderTable();
-		
-		$this->tplObj->assign_vars(array(
-			'galaxy'  		=> $Galaxy,
-			'system'  		=> $System,
-			'planet'   		=> $Planet,
-			'name'    		=> $TargetInfo['name'],
-			'fleetTable'	=> $fleetTable,
-		));
-		
-		$this->display('page.phalanx.default.tpl');			
-	}
+        $GLOBALS['DATABASE']->query("UPDATE ".PLANETS." SET `deuterium` = `deuterium` - ".PHALANX_DEUTERIUM." WHERE `id` = '".$PLANET['id']."';");
+        
+        $TargetInfo = $GLOBALS['DATABASE']->getFirstRow("SELECT id, name, id_owner FROM ".PLANETS." WHERE`universe` = '".$UNI."' AND `galaxy` = '".$Galaxy."' AND `system` = '".$System."' AND `planet` = '".$Planet."' AND `planet_type` = '1';");
+        
+        if (empty($TargetInfo)) {
+            $this->printMessage($LNG['px_out_of_range']);
+        }
+        
+        require_once('includes/classes/class.FlyingFleetsTable.php');
+        $fleetTableObj = new FlyingFleetsTable;
+        $fleetTableObj->setPhalanxMode();
+        $fleetTableObj->setUser($TargetInfo['id_owner']);
+        $fleetTableObj->setPlanet($TargetInfo['id']);
+        $fleetTable    =  $fleetTableObj->renderTable();
+        
+        $this->tplObj->assign_vars(array(
+            'galaxy'        => $Galaxy,
+            'system'        => $System,
+            'planet'        => $Planet,
+            'name'            => $TargetInfo['name'],
+            'fleetTable'    => $fleetTable,
+        ));
+        
+        $this->display('page.phalanx.default.tpl');
+    }
 }

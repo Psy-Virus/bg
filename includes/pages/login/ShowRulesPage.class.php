@@ -31,20 +31,20 @@
 
 class ShowRulesPage extends AbstractPage
 {
-	public static $requireModule = 0;
+    public static $requireModule = 0;
 
-	function __construct() 
-	{
-		parent::__construct();
-	}
-	
-	function show() 
-	{
-		global $LNG;
-		$this->assign(array(
-			'rules'		=> $LNG->getTemplate('rules'),
-		));
-		
-		$this->render('page.rules.default.tpl');
-	}
+    public function __construct()
+    {
+        parent::__construct();
+    }
+    
+    public function show()
+    {
+        global $LNG;
+        $this->assign(array(
+            'rules'        => $LNG->getTemplate('rules'),
+        ));
+        
+        $this->render('page.rules.default.tpl');
+    }
 }

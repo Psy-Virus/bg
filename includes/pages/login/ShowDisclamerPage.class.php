@@ -31,22 +31,22 @@
 
 class ShowDisclamerPage extends AbstractPage
 {
-	public static $requireModule = 0;
+    public static $requireModule = 0;
 
-	function __construct() 
-	{
-		parent::__construct();
-	}
-	
-	function show() 
-	{
-		$this->assign(array(
-			'disclamerAddress'	=> makebr(Config::get('disclamerAddress')),
-			'disclamerPhone'	=> Config::get('disclamerPhone'),
-			'disclamerMail'		=> Config::get('disclamerMail'),
-			'disclamerNotice'	=> Config::get('disclamerNotice'),
-		));
-		
-		$this->render('page.disclamer.default.tpl');
-	}
+    public function __construct()
+    {
+        parent::__construct();
+    }
+    
+    public function show()
+    {
+        $this->assign(array(
+            'disclamerAddress'    => makebr(Config::get('disclamerAddress')),
+            'disclamerPhone'    => Config::get('disclamerPhone'),
+            'disclamerMail'        => Config::get('disclamerMail'),
+            'disclamerNotice'    => Config::get('disclamerNotice'),
+        ));
+        
+        $this->render('page.disclamer.default.tpl');
+    }
 }

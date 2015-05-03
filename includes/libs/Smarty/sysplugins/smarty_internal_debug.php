@@ -15,7 +15,8 @@
  * @package Smarty
  * @subpackage Debug
  */
-class Smarty_Internal_Debug extends Smarty_Internal_Data {
+class Smarty_Internal_Debug extends Smarty_Internal_Data
+{
 
     /**
      * template data
@@ -200,7 +201,6 @@ class Smarty_Internal_Debug extends Smarty_Internal_Data {
             return $key;
         }
     }
-
 }
 
 ?>
