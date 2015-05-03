@@ -30,6 +30,7 @@ class Database extends mysqli
 {
 	protected $con;
 	protected $exception;
+    protected $queryCount = 0;
 
 	/**
 	 * Constructor: Set database access data.
@@ -68,6 +69,7 @@ class Database extends mysqli
 	 *
 	 * @return resource	Results of the query
 	 */
+
 	public function query($resource)
 	{
 		if($result = parent::query($resource))
